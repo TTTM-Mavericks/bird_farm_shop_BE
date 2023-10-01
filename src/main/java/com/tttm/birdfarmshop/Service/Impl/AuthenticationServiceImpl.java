@@ -1,15 +1,13 @@
 package com.tttm.birdfarmshop.Service.Impl;
 
-import com.tttm.birdfarmshop.Models.Customer;
 import com.tttm.birdfarmshop.Models.ERole;
 import com.tttm.birdfarmshop.Models.User;
-import com.tttm.birdfarmshop.Repository.CustomerRepository;
 import com.tttm.birdfarmshop.Repository.UserRepository;
 import com.tttm.birdfarmshop.Service.*;
 import com.tttm.birdfarmshop.Service.Impl.ServiceMsg.ConstantMessage;
 import com.tttm.birdfarmshop.Utils.AuthenticationRequest;
 import com.tttm.birdfarmshop.Utils.AuthenticationResponse;
-import com.tttm.birdfarmshop.exception.CustomException;
+import com.tttm.birdfarmshop.Exception.CustomException;
 import lombok.RequiredArgsConstructor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

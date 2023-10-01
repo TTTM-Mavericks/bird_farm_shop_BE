@@ -1,31 +1,23 @@
-package com.tttm.birdfarmshop.controller;
+package com.tttm.birdfarmshop.Controller;
 
 
-import com.tttm.birdfarmshop.Models.User;
 import com.tttm.birdfarmshop.Service.AuthenticationService;
 import com.tttm.birdfarmshop.Utils.AuthenticationRequest;
 import com.tttm.birdfarmshop.Utils.AuthenticationResponse;
-import com.tttm.birdfarmshop.exception.CustomException;
+import com.tttm.birdfarmshop.Exception.CustomException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/auth")
-public class AuthController {
+@RequestMapping("/admin")
+public class AdminController {
     private final AuthenticationService authenticationService;
-    @PostMapping("/register")
-    public ResponseEntity<AuthenticationResponse> register(@RequestBody User user) throws Exception {
-        try {
-            return new ResponseEntity<>(authenticationService.register(user), HttpStatus.OK);
-        }
-        catch (Exception ex)
-        {
-            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
-        }
-    }
 
     @PostMapping("/login")
     public ResponseEntity<AuthenticationResponse> login(@RequestBody AuthenticationRequest user) throws CustomException {

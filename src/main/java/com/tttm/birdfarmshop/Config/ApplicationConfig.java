@@ -1,4 +1,4 @@
-package com.tttm.birdfarmshop.config;
+package com.tttm.birdfarmshop.Config;
 
 import com.tttm.birdfarmshop.Models.User;
 import com.tttm.birdfarmshop.Repository.UserRepository;

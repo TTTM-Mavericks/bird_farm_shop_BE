@@ -1,4 +1,4 @@
-package com.tttm.birdfarmshop.exception;
+package com.tttm.birdfarmshop.Exception;
 
 import io.jsonwebtoken.ExpiredJwtException;
 import org.apache.logging.log4j.LogManager;
