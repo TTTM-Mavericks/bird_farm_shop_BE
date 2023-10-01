@@ -1,4 +1,4 @@
-package com.tttm.birdfarmshop.config;
+package com.tttm.birdfarmshop.Config;
 
 import com.tttm.birdfarmshop.Service.JwtService;
 import jakarta.servlet.FilterChain;

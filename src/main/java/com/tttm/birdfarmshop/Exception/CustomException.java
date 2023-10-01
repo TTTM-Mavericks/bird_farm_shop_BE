@@ -1,4 +1,4 @@
-package com.tttm.birdfarmshop.exception;
+package com.tttm.birdfarmshop.Exception;
 
 public class CustomException extends Exception {
     public CustomException(String message)
