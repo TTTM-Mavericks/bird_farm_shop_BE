@@ -75,7 +75,10 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 false,
                 role
         );
+        var jwtToken = jwtService.generateToken(user);
+
         session.setAttribute(dto.getEmail(), user);
+        session.setAttribute(user.toString(), jwtToken);
 
         return new AuthenticationResponse("Move to Send Code to Email");
     }

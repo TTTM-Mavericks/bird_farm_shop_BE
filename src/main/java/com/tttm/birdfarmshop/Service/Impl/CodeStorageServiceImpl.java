@@ -87,6 +87,7 @@ public class CodeStorageServiceImpl implements CodeStorageService {
             EmailAndCode.remove(dto.getEmail());
             EmailAndExpiration.remove(dto.getEmail());
             session.removeAttribute(dto.getEmail());
+            session.removeAttribute(user.toString());
 
             return jwtToken.toString();
         }
