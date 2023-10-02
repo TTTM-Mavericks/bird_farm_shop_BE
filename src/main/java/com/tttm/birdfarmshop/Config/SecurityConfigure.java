@@ -1,6 +1,6 @@
 package com.tttm.birdfarmshop.Config;
 
-import com.tttm.birdfarmshop.Models.ERole;
+import com.tttm.birdfarmshop.Enums.ERole;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -11,6 +11,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter;
 
 @Configuration
 @EnableWebSecurity
@@ -31,10 +32,14 @@ public class SecurityConfigure {
                             auth.requestMatchers("/auth/**")
                                     .permitAll();
 
-                            auth.requestMatchers("/admin/**").
-                                    hasRole(ERole.ADMINISTRATOR.name())
+                            auth.requestMatchers("/email/**")
+                                    .permitAll();
+
+                            auth.requestMatchers("/admin/**")
+                                    .hasRole(ERole.ADMINISTRATOR.name())
                                     .anyRequest()
                                     .permitAll();
+
                         }
                 )
                 .sessionManagement(session -> {
@@ -42,7 +47,9 @@ public class SecurityConfigure {
                 })
                 .httpBasic(Customizer.withDefaults())
                 .authenticationProvider(authenticationProvider)
-                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(new SimpleCORSFilter(), WebAsyncManagerIntegrationFilter.class);
+
         return httpSecurity.build();
     }
 }

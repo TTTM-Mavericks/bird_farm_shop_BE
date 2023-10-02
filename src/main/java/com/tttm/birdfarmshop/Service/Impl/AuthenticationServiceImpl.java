@@ -1,13 +1,14 @@
 package com.tttm.birdfarmshop.Service.Impl;
 
-import com.tttm.birdfarmshop.Models.ERole;
+import com.tttm.birdfarmshop.Enums.ERole;
 import com.tttm.birdfarmshop.Models.User;
 import com.tttm.birdfarmshop.Repository.UserRepository;
 import com.tttm.birdfarmshop.Service.*;
-import com.tttm.birdfarmshop.Service.Impl.ServiceMsg.ConstantMessage;
-import com.tttm.birdfarmshop.Utils.AuthenticationRequest;
-import com.tttm.birdfarmshop.Utils.AuthenticationResponse;
+import com.tttm.birdfarmshop.Constant.ConstantMessage;
+import com.tttm.birdfarmshop.Utils.Request.AuthenticationRequest;
+import com.tttm.birdfarmshop.Utils.Response.AuthenticationResponse;
 import com.tttm.birdfarmshop.Exception.CustomException;
+import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -20,7 +21,6 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 public class AuthenticationServiceImpl implements AuthenticationService {
-    private final UserRepository userRepository;
 
     private final PasswordEncoder passwordEncoder;
 
@@ -28,19 +28,11 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
     private final AuthenticationManager authenticationManager;
 
-    private final CustomerService customerService;
-
-    private final AdminService adminService;
-
-    private final ShipperService shipperService;
-
-    private final SellerService sellerService;
-
-    private final HealthcareProfessionalService healthcareProfessionalService;
+    private final UserRepository userRepository;
 
     private static final Logger logger = LogManager.getLogger(AuthenticationServiceImpl.class);
     @Override
-    public AuthenticationResponse register(User dto) throws CustomException
+    public AuthenticationResponse register(User dto, HttpSession session) throws CustomException
     {
         ERole role = null;
         switch (dto.getRole().toString().toUpperCase())
@@ -80,40 +72,20 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 dto.getGender(),
                 dto.getDateOfBirth(),
                 dto.getAddress(),
-                true,
+                false,
                 role
         );
-
-        userRepository.save(user);
-
         var jwtToken = jwtService.generateToken(user);
-        logger.info("Create new Email: {} Successfully", dto.getEmail());
 
-        switch (role.name().toUpperCase())
-        {
-            case "CUSTOMER":
-                customerService.createCustomer(user);
-                break;
-            case "ADMINISTRATOR":
-                adminService.createAdmin(user);
-                break;
-            case "SHIPPER":
-                shipperService.createShipper(user);
-                break;
-            case "SELLER":
-                sellerService.createSeller(user);
-                break;
-            case "HEALTHCAREPROFESSIONAL":
-                healthcareProfessionalService.createHealthcareProfessional(user);
-                break;
-        }
+        session.setAttribute(dto.getEmail(), user);
+        session.setAttribute(user.toString(), jwtToken);
 
-        return AuthenticationResponse.builder().token(jwtToken).build();
+        return new AuthenticationResponse("Move to Send Code to Email");
     }
 
     @Override
     public AuthenticationResponse login(AuthenticationRequest dto) throws CustomException {
-        User user = userRepository.findUserByEmailAndActiveStatus(dto.getEmail(), true);
+        User user = userRepository.findUserByEmailAndActiveStatus(dto.getEmail(), false);
         if(user == null)
         {
             logger.warn(ConstantMessage.INVALID_USERNAME_OR_PASSWORD.toString());
