@@ -1,5 +1,6 @@
 package com.tttm.birdfarmshop.Models;
 
+import com.tttm.birdfarmshop.Enums.ERole;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
