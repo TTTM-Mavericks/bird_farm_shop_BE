@@ -3,6 +3,7 @@ package com.tttm.birdfarmshop.Service.Impl;
 
 import com.tttm.birdfarmshop.Models.User;
 import com.tttm.birdfarmshop.Repository.UserRepository;
+import com.tttm.birdfarmshop.Service.JwtService;
 import com.tttm.birdfarmshop.Service.MailService;
 import com.tttm.birdfarmshop.Service.ThymeleafService;
 import jakarta.mail.internet.MimeMessage;
@@ -12,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.nio.charset.StandardCharsets;
@@ -23,6 +25,7 @@ import java.util.regex.Pattern;
 @Service
 @RequiredArgsConstructor
 public class MailServiceImpl implements MailService {
+    private final PasswordEncoder passwordEncoder;
 
     private final JavaMailSender javaMailSender;
 
@@ -30,6 +33,7 @@ public class MailServiceImpl implements MailService {
 
     private final ThymeleafService thymeleafService;
 
+    private final JwtService jwtService;
     private static final Logger logger = LoggerFactory.getLogger(MailServiceImpl.class);
 
     @Value("${spring.mail.username")
@@ -83,16 +87,22 @@ public class MailServiceImpl implements MailService {
     public String ForgotPassword(String Email) {
         User user = userRepository.findUserByEmail(Email);
         if(user != null) {
-            String password = generatePassword();
+            String generate_Password = generatePassword();
+            String password = passwordEncoder.encode(generate_Password);
             user.setPassword(password);
             String email_to = user.getEmail();
             String email_subject = "Update User Password";
 
-
             userRepository.save(user);
-            sendMailForgotPassword(email_to, email_subject, password);
+            sendMailForgotPassword(email_to, email_subject, generate_Password);
+
+            var jwtToken = jwtService.generateToken(user);
+
+            logger.info("New Password {} ", generate_Password);
+
+            return jwtToken.toString();
         }
-        return "Success";
+        return "Fail to Access Forgot Password";
     }
     private void sendCodeToMail(String email_to, String email_subject, String code) {
         try{
