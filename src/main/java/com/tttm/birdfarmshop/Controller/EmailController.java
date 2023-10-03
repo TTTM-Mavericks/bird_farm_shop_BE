@@ -2,6 +2,7 @@ package com.tttm.birdfarmshop.Controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.tttm.birdfarmshop.Constant.ConstantAPI;
 import com.tttm.birdfarmshop.Exception.CustomException;
 import com.tttm.birdfarmshop.Models.User;
 import com.tttm.birdfarmshop.Service.CodeStorageService;
@@ -18,11 +19,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/email")
+@RequestMapping(ConstantAPI.EMAIL)
 public class EmailController {
     private final MailService mailService;
     private final CodeStorageService codeStorageService;
-    @PostMapping("/forgotPassword")
+    @PostMapping(ConstantAPI.FORGOT_PASSWORD)
     public ResponseEntity<String> ForgotPassword(@RequestBody String json) throws CustomException
     {
         try
@@ -37,7 +38,7 @@ public class EmailController {
         }
     }
 
-    @PostMapping("/sendCode")
+    @PostMapping(ConstantAPI.SEND_CODE)
     public ResponseEntity<String> sendCode(@RequestBody String json, HttpSession session) throws CustomException
     {
         try
@@ -65,7 +66,7 @@ public class EmailController {
         return new ResponseEntity<>("Empty Register", HttpStatus.OK);
     }
 
-    @PostMapping("/verifyCode")
+    @PostMapping(ConstantAPI.VERIFY_CODE)
     public ResponseEntity<String> verifyCode(@RequestBody String json, HttpSession session) throws CustomException
     {
         try

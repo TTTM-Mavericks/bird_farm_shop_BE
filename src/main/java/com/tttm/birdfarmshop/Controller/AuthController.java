@@ -1,6 +1,7 @@
 package com.tttm.birdfarmshop.Controller;
 
 
+import com.tttm.birdfarmshop.Constant.ConstantAPI;
 import com.tttm.birdfarmshop.Models.User;
 import com.tttm.birdfarmshop.Service.AuthenticationService;
 import com.tttm.birdfarmshop.Service.MailService;
@@ -15,12 +16,12 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/auth")
+@RequestMapping(ConstantAPI.AUTH)
 public class AuthController {
     private final AuthenticationService authenticationService;
     private final MailService mailService;
 
-    @PostMapping("/register")
+    @PostMapping(ConstantAPI.REGISTER)
     public ResponseEntity<AuthenticationResponse> register(@RequestBody User user, HttpSession session) throws Exception {
         try {
             return new ResponseEntity<>(authenticationService.register(user, session), HttpStatus.OK);
@@ -31,7 +32,7 @@ public class AuthController {
         }
     }
 
-    @PostMapping("/login")
+    @PostMapping(ConstantAPI.LOGIN)
     public ResponseEntity<AuthenticationResponse> login(@RequestBody AuthenticationRequest user) throws CustomException {
         try {
             return new ResponseEntity<>(authenticationService.login(user), HttpStatus.OK);
