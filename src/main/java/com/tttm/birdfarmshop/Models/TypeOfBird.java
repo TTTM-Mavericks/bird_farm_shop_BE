@@ -27,4 +27,9 @@ public class TypeOfBird {
 
   @OneToMany(mappedBy = "typeOfBird")
   private List<Bird> birdList;
+
+  public TypeOfBird(String typeName, Integer quantity) {
+    this.typeName = typeName;
+    this.quantity = quantity;
+  }
 }
