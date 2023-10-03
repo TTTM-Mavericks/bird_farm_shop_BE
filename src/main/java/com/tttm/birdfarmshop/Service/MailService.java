@@ -1,11 +1,12 @@
 package com.tttm.birdfarmshop.Service;
 
 
+import com.tttm.birdfarmshop.Utils.Response.AuthenticationResponse;
+
 public interface MailService {
 
-    String ForgotPassword(String Email);
+    AuthenticationResponse ForgotPassword(String Email);
 
     String SendCode(String Email);
-
 }
 
