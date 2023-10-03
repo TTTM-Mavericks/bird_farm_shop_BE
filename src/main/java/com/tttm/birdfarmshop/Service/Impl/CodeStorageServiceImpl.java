@@ -1,16 +1,21 @@
 package com.tttm.birdfarmshop.Service.Impl;
 
+import com.tttm.birdfarmshop.Constant.ConstantMessage;
 import com.tttm.birdfarmshop.DTO.MailDTO;
 import com.tttm.birdfarmshop.Enums.ERole;
+import com.tttm.birdfarmshop.Exception.CustomException;
 import com.tttm.birdfarmshop.Models.User;
 import com.tttm.birdfarmshop.Repository.UserRepository;
 import com.tttm.birdfarmshop.Service.*;
+import com.tttm.birdfarmshop.Utils.Response.AuthenticationResponse;
+import com.tttm.birdfarmshop.Utils.Response.MessageResponse;
 import jakarta.servlet.http.HttpSession;
 import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.session.Session;
 import org.springframework.session.SessionRepository;
 import org.springframework.stereotype.Service;
@@ -21,6 +26,8 @@ import java.util.Map;
 @Service
 @RequiredArgsConstructor
 public class CodeStorageServiceImpl implements CodeStorageService {
+
+    private final PasswordEncoder passwordEncoder;
 
     private final JwtService jwtService;
 
@@ -34,25 +41,21 @@ public class CodeStorageServiceImpl implements CodeStorageService {
 
     private final ShipperService shipperService;
 
+    private final MailService mailService;
+
     private final SellerService sellerService;
 
     private final HealthcareProfessionalService healthcareProfessionalService;
     private static final Logger logger = LogManager.getLogger(AuthenticationServiceImpl.class);
-    @Override
-    public void storeCodeInSession(MailDTO dto, HttpSession session) {
-        EmailAndCode.put(dto.getEmail(), dto.getCode());
-        Long expirationTime = System.currentTimeMillis() + (60 * 1000);
-        EmailAndExpiration.put(dto.getEmail(), expirationTime);
-    }
 
     @Override
-    public String getCodeFromSession(MailDTO dto, HttpSession session) {
+    public AuthenticationResponse getCodeFromSession(MailDTO dto, HttpSession session) {
         Long expirationTime = EmailAndExpiration.get(dto.getEmail());
         if(expirationTime != null && expirationTime < System.currentTimeMillis()) // Check the Expiration Time for each Keys store in KeySessions
         {
             EmailAndCode.remove(dto.getEmail());
             EmailAndExpiration.remove(dto.getEmail());
-            return "The Code is expired.";
+            return new AuthenticationResponse("The Code is Expired.");
         }
         String code = (String) EmailAndCode.get(dto.getEmail());
         if(code.equals(dto.getCode())) // Compare Code from System with Customer
@@ -89,8 +92,65 @@ public class CodeStorageServiceImpl implements CodeStorageService {
             session.removeAttribute(dto.getEmail());
             session.removeAttribute(user.toString());
 
-            return jwtToken.toString();
+            return AuthenticationResponse.builder().token(jwtToken).build();
         }
-        return "Invalid Code";
+        return new AuthenticationResponse("Invalid Code");
+    }
+
+    @Override
+    public MessageResponse register(User dto, HttpSession session) throws CustomException
+    {
+        ERole role = null;
+        switch (dto.getRole().toString().toUpperCase())
+        {
+            case "CUSTOMER":
+                role = ERole.CUSTOMER;
+                break;
+            case "ADMINISTRATOR":
+                role = ERole.ADMINISTRATOR;
+                break;
+            case "SHIPPER":
+                role = ERole.SHIPPER;
+                break;
+            case "SELLER":
+                role = ERole.SELLER;
+                break;
+            case "HEALTHCAREPROFESSIONAL":
+                role = ERole.HEALTHCAREPROFESSIONAL;
+                break;
+        }
+        if (userRepository.findUserByEmail(dto.getEmail()) != null)
+        {
+            logger.warn(ConstantMessage.EMAIL_IS_EXIST);
+            throw new CustomException(ConstantMessage.EMAIL_IS_EXIST.toString());
+        }
+        if (userRepository.findUserByPhone(dto.getPhone()) != null)
+        {
+            logger.warn(ConstantMessage.PHONE_IS_EXIST);
+            throw new CustomException(ConstantMessage.PHONE_IS_EXIST.toString());
+        }
+        User user = new User(
+                dto.getFirstName(),
+                dto.getLastName(),
+                dto.getEmail(),
+                dto.getPhone(),
+                passwordEncoder.encode(dto.getPassword()),
+                dto.getGender(),
+                dto.getDateOfBirth(),
+                dto.getAddress(),
+                false,
+                role
+        );
+        var jwtToken = jwtService.generateToken(user);
+
+        String code = mailService.SendCode(dto.getEmail());
+
+        session.setAttribute(dto.getEmail(), user);
+        session.setAttribute(user.toString(), jwtToken);
+        EmailAndCode.put(dto.getEmail(), code);
+        Long expirationTime = System.currentTimeMillis() + (60 * 1000);
+        EmailAndExpiration.put(dto.getEmail(), expirationTime);
+
+        return new MessageResponse("Success");
     }
 }
