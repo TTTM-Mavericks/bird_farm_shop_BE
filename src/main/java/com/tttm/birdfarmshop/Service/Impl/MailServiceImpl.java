@@ -6,6 +6,7 @@ import com.tttm.birdfarmshop.Repository.UserRepository;
 import com.tttm.birdfarmshop.Service.JwtService;
 import com.tttm.birdfarmshop.Service.MailService;
 import com.tttm.birdfarmshop.Service.ThymeleafService;
+import com.tttm.birdfarmshop.Utils.Response.AuthenticationResponse;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
@@ -84,7 +85,7 @@ public class MailServiceImpl implements MailService {
     }
 
     @Override
-    public String ForgotPassword(String Email) {
+    public AuthenticationResponse ForgotPassword(String Email) {
         User user = userRepository.findUserByEmail(Email);
         if(user != null) {
             String generate_Password = generatePassword();
@@ -100,9 +101,9 @@ public class MailServiceImpl implements MailService {
 
             logger.info("New Password {} ", generate_Password);
 
-            return jwtToken.toString();
+            return AuthenticationResponse.builder().token(jwtToken).build();
         }
-        return "Fail to Access Forgot Password";
+        return new AuthenticationResponse("Fail to Access Forgot Password");
     }
     private void sendCodeToMail(String email_to, String email_subject, String code) {
         try{
