@@ -1,6 +1,6 @@
 package com.tttm.birdfarmshop.Controller;
 
-
+import com.tttm.birdfarmshop.Constant.ConstantAPI;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tttm.birdfarmshop.DTO.MailDTO;
@@ -20,15 +20,15 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/auth")
+@RequestMapping(ConstantAPI.AUTH)
 public class AuthController {
     private final AuthenticationService authenticationService;
 
     private final MailService mailService;
-
+  
     private final CodeStorageService codeStorageService;
 
-    @PostMapping("/register")
+    @PostMapping(ConstantAPI.REGISTER))
     public ResponseEntity<MessageResponse> register(@RequestBody User user, HttpSession session) throws Exception {
         try {
             return new ResponseEntity<>(codeStorageService.register(user, session), HttpStatus.OK);
@@ -39,7 +39,7 @@ public class AuthController {
         }
     }
 
-    @PostMapping("/login")
+    @PostMapping(ConstantAPI.LOGIN)
     public ResponseEntity<AuthenticationResponse> login(@RequestBody AuthenticationRequest user) throws CustomException {
         try {
             return new ResponseEntity<>(authenticationService.login(user), HttpStatus.OK);
