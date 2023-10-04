@@ -2,16 +2,18 @@ package com.tttm.birdfarmshop.Service;
 
 import com.tttm.birdfarmshop.DTO.TypeOfBirdDTO;
 import com.tttm.birdfarmshop.Models.TypeOfBird;
+import com.tttm.birdfarmshop.Utils.Response.MessageResponse;
 
 import java.util.Enumeration;
+import java.util.List;
 
 public interface TypeOfBirdService {
-    String AddNewTypeOfBird(TypeOfBirdDTO dto);
+    MessageResponse AddNewTypeOfBird(TypeOfBirdDTO dto);
 
-    String UpdateTypeOfBird(Integer typeID, TypeOfBirdDTO dto);
+    MessageResponse UpdateTypeOfBird(String typeID, TypeOfBirdDTO dto);
 
-    TypeOfBird findTypeOfBirdByID(Integer typeID);
+    TypeOfBird findTypeOfBirdByID(String typeID);
 
-    Enumeration<TypeOfBird> findAllTypeOfBird();
+    List<TypeOfBird> findAllTypeOfBird();
 
 }

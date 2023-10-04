@@ -1,7 +1,5 @@
 package com.tttm.birdfarmshop.DTO;
 
-import com.tttm.birdfarmshop.Enums.ProductStatus;
-import jakarta.persistence.Column;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -9,7 +7,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class FoodDTO {
+public class NestDTO {
     private String productName;
 
     private Double price;

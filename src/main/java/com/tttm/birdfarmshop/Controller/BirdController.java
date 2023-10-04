@@ -2,10 +2,10 @@ package com.tttm.birdfarmshop.Controller;
 
 import com.tttm.birdfarmshop.Constant.ConstantAPI;
 import com.tttm.birdfarmshop.Constant.ConstantParametter;
-import com.tttm.birdfarmshop.DTO.FoodDTO;
+import com.tttm.birdfarmshop.DTO.BirdDTO;
 import com.tttm.birdfarmshop.Exception.CustomException;
 import com.tttm.birdfarmshop.Models.Product;
-import com.tttm.birdfarmshop.Service.FoodService;
+import com.tttm.birdfarmshop.Service.BirdService;
 import com.tttm.birdfarmshop.Utils.Response.MessageResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -16,34 +16,34 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping(ConstantAPI.FOOD)
-public class FoodController {
-    private final FoodService foodService;
-    @PostMapping(ConstantAPI.ADD_FOOD)
-    public ResponseEntity<MessageResponse> addFood(@RequestBody FoodDTO dto) throws CustomException {
+@RequestMapping(ConstantAPI.BIRD)
+public class BirdController {
+    private final BirdService birdService;
+    @PostMapping(ConstantAPI.ADD_BIRD)
+    public ResponseEntity<MessageResponse> addBird(@RequestBody BirdDTO dto) throws CustomException {
         try {
-            return new ResponseEntity<>(foodService.AddNewFood(dto), HttpStatus.OK);
+            return new ResponseEntity<>(birdService.AddNewBird(dto), HttpStatus.OK);
         }
         catch (Exception ex)
         {
-            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+            return new ResponseEntity<>(new MessageResponse(ex.getMessage()), HttpStatus.FORBIDDEN);
         }
     }
-    @PutMapping(ConstantAPI.UPDATE_FOOD + ConstantParametter.FOOD_ID)
-    public ResponseEntity<MessageResponse> updateFood(@PathVariable ("FoodID") String FoodID,
-                                                            @RequestBody FoodDTO dto) throws CustomException {
+    @PutMapping(ConstantAPI.UPDATE_BIRD + ConstantParametter.BIRD_ID)
+    public ResponseEntity<MessageResponse> updateBird(@PathVariable ("BirdID") String BirdID,
+                                                            @RequestBody BirdDTO dto) throws CustomException {
         try {
-            return new ResponseEntity<>(foodService.UpdateFood(FoodID, dto), HttpStatus.OK);
+            return new ResponseEntity<>(birdService.UpdateFood(BirdID, dto), HttpStatus.OK);
         }
         catch (Exception ex)
         {
-            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+            return new ResponseEntity<>(new MessageResponse(ex.getMessage()), HttpStatus.FORBIDDEN);
         }
     }
-    @GetMapping(ConstantAPI.GET_FOOD_BY_ID + ConstantParametter.FOOD_ID)
-    public ResponseEntity<Product> getFoodByID(@PathVariable ("FoodID") String FoodID) throws CustomException {
+    @GetMapping(ConstantAPI.GET_BIRD_BY_ID + ConstantParametter.BIRD_ID)
+    public ResponseEntity<Product> getBirdByID(@PathVariable ("BirdID") String BirdID) throws CustomException {
         try {
-            return new ResponseEntity<>(foodService.findFoodByFoodID(FoodID), HttpStatus.OK);
+            return new ResponseEntity<>(birdService.findBirdByBirdID(BirdID), HttpStatus.OK);
         }
         catch (Exception ex)
         {
@@ -51,10 +51,10 @@ public class FoodController {
         }
     }
 
-    @GetMapping(ConstantAPI.GET_ALL_FOOD)
-    public ResponseEntity<List<Product>> getAllFood() throws CustomException {
+    @GetMapping(ConstantAPI.GET_ALL_BIRD)
+    public ResponseEntity<List<Product>> getAllBird() throws CustomException {
         try {
-            return new ResponseEntity<>(foodService.findAllFood(), HttpStatus.OK);
+            return new ResponseEntity<>(birdService.findAllBird(), HttpStatus.OK);
         }
         catch (Exception ex)
         {
