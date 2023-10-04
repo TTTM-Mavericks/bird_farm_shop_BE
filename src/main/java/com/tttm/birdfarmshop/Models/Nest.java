@@ -13,10 +13,13 @@ import lombok.NoArgsConstructor;
 public class Nest {
     @Id
     @Column(name = "nestID", unique = true, nullable = false)
-    private Integer nestID;
+    private String nestID;
 
     @OneToOne
     @JoinColumn(name = "nestID", referencedColumnName = "productID")
     private Product product;
 
+    public Nest(String nestID) {
+        this.nestID = nestID;
+    }
 }

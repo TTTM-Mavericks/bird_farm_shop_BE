@@ -1,5 +1,6 @@
 package com.tttm.birdfarmshop.Models;
 
+import com.tttm.birdfarmshop.Enums.ProductStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -13,8 +14,7 @@ import lombok.NoArgsConstructor;
 public class Product {
   @Id
   @Column(name = "productID", unique = true, nullable = false)
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Integer productID;
+  private String productID;
 
   @Column(name = "productName", unique = false, nullable = false, length = 100)
   private String productName;
@@ -25,7 +25,7 @@ public class Product {
   @Column(name = "description", unique = false, nullable = true, length = 500)
   private String description;
 
-  @Column(name = "typeOfProduct", unique = false, nullable = true, length = 100)
+  @Column(name = "typeOfProduct", unique = false, nullable = false, length = 100)
   private String typeOfProduct;
 
   @Column(name = "images", unique = false, nullable = true)
@@ -36,4 +36,7 @@ public class Product {
 
   @Column(name = "rating", unique = false, nullable = false)
   private Integer rating;
+
+  @Column(name = "productStatus", unique = false, nullable = false)
+  private ProductStatus productStatus;
 }

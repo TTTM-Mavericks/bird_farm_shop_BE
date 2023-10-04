@@ -1,5 +1,6 @@
 package com.tttm.birdfarmshop.Models;
 
+import com.tttm.birdfarmshop.Enums.OrderStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;

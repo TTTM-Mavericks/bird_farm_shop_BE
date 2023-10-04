@@ -28,7 +28,7 @@ public class AuthController {
   
     private final CodeStorageService codeStorageService;
 
-    @PostMapping(ConstantAPI.REGISTER))
+    @PostMapping(ConstantAPI.REGISTER)
     public ResponseEntity<MessageResponse> register(@RequestBody User user, HttpSession session) throws Exception {
         try {
             return new ResponseEntity<>(codeStorageService.register(user, session), HttpStatus.OK);

@@ -8,4 +8,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class ConstantParametter {
     public static final String USER_ID = "/{UserID}";
+    public static final String TYPE_OF_BIRD_ID = "/{TypeID}";
+    public static final String FOOD_ID = "/{FoodID}";
+    public static final String NEST_ID = "/{NestID}";
+    public static final String BIRD_ID = "/{BirdID}";
 }

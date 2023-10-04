@@ -16,8 +16,7 @@ public class TypeOfBird {
 
   @Id
   @Column(name = "typeID", nullable = false, unique = true)
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Integer typeID;
+  private String typeID;
 
   @Column(name = "typeName", nullable = false, unique = false, length = 100)
   private String typeName;
@@ -27,4 +26,10 @@ public class TypeOfBird {
 
   @OneToMany(mappedBy = "typeOfBird")
   private List<Bird> birdList;
+
+  public TypeOfBird(String typeID, String typeName, Integer quantity) {
+    this.typeID = typeID;
+    this.typeName = typeName;
+    this.quantity = quantity;
+  }
 }

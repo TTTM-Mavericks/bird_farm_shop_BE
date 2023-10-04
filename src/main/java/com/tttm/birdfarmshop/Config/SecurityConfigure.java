@@ -32,6 +32,9 @@ public class SecurityConfigure {
                             auth.requestMatchers("/auth/**")
                                     .permitAll();
 
+                            auth.requestMatchers("/typeOfBird/**, /food/**, /nest/**, /bird/**")
+                                    .permitAll();
+
                             auth.requestMatchers("/email/**")
                                     .permitAll();
 

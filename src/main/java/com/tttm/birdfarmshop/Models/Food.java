@@ -13,10 +13,13 @@ import lombok.NoArgsConstructor;
 public class Food {
     @Id
     @Column(name = "foodID", unique = true, nullable = false)
-    private Integer foodID;
+    private String foodID;
 
     @OneToOne
     @JoinColumn(name = "foodID", referencedColumnName = "productID")
     private Product product;
 
+    public Food(String foodID) {
+        this.foodID = foodID;
+    }
 }
