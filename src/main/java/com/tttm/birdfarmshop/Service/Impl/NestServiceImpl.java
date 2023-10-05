@@ -42,47 +42,63 @@ public class NestServiceImpl implements NestService {
                     dto.getImages(),
                     dto.getFeedback(),
                     dto.getRating(),
-                    ProductStatus.AVAILABLE
+                    ProductStatus.AVAILABLE,
+                    dto.getQuantity()
             ));
 
             nestRepository.save(new Nest(NestID));
-            return new MessageResponse("Add new Nest Successfully");
+            return new MessageResponse("Success");
         }
-        return new MessageResponse("Fail to Add new Nest");
+        return new MessageResponse("Fail");
     }
 
     @Override
     public MessageResponse UpdateNest(String NestID, NestDTO dto) {
-        if(productRepository.findById(NestID).get() == null)
-        {
-            return new MessageResponse("NestID is not existed");
-        }
-        if(isValidFood(dto))
-        {
+        try {
+            Optional<Product> productOptional = productRepository.findById(NestID);
+            if(productOptional.isEmpty() || !isValidFood(dto))
+            {
+                return new MessageResponse("Fail");
+            }
             return new MessageResponse(
                     Optional
                             .ofNullable(productRepository.findById(NestID).get())
-                            .map(food ->{
-                                food.setProductName(dto.getProductName());
-                                food.setPrice(dto.getPrice());
-                                food.setDescription(dto.getDescription());
-                                food.setTypeOfProduct(dto.getTypeOfProduct());
-                                food.setImages(dto.getImages());
-                                food.setFeedback(dto.getFeedback());
-                                food.setRating(dto.getRating());
-                                productRepository.save(food);
-                                return "Update Nest Successfully";
+                            .map(nest ->{
+                                nest.setProductName(dto.getProductName());
+                                nest.setPrice(dto.getPrice());
+                                nest.setDescription(dto.getDescription());
+                                nest.setTypeOfProduct(dto.getTypeOfProduct());
+                                nest.setImages(dto.getImages());
+                                nest.setFeedback(dto.getFeedback());
+                                nest.setRating(dto.getRating());
+                                nest.setQuantity(dto.getQuantity());
+                                productRepository.save(nest);
+                                return "Success";
                             })
-                            .orElse("Fail to update Nest")
+                            .orElse("Fail")
             );
         }
-        else return new MessageResponse("Invalid type of input. Fail to update Type Of Nest");
+        catch (Exception ex)
+        {
+            return new MessageResponse("Fail");
+        }
     }
 
     @Override
     public Product findNestByNestID(String NestID) {
-        return productRepository.findById(NestID)
-                .orElseThrow(() -> new NotFoundException("Nest not Found with ID: " + NestID));
+        try
+        {
+            Optional<Product> nestOptional = productRepository.findById(NestID);
+            if(nestOptional.isPresent())
+            {
+                return nestOptional.get();
+            }
+            else return new Product();
+        }
+        catch (Exception e)
+        {
+            return new Product();
+        }
     }
 
     @Override

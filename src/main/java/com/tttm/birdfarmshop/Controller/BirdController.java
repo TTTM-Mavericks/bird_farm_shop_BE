@@ -6,6 +6,7 @@ import com.tttm.birdfarmshop.DTO.BirdDTO;
 import com.tttm.birdfarmshop.Exception.CustomException;
 import com.tttm.birdfarmshop.Models.Product;
 import com.tttm.birdfarmshop.Service.BirdService;
+import com.tttm.birdfarmshop.Utils.Response.BirdResponse;
 import com.tttm.birdfarmshop.Utils.Response.MessageResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -33,7 +34,7 @@ public class BirdController {
     public ResponseEntity<MessageResponse> updateBird(@PathVariable ("BirdID") String BirdID,
                                                             @RequestBody BirdDTO dto) throws CustomException {
         try {
-            return new ResponseEntity<>(birdService.UpdateFood(BirdID, dto), HttpStatus.OK);
+            return new ResponseEntity<>(birdService.UpdateBird(BirdID, dto), HttpStatus.OK);
         }
         catch (Exception ex)
         {
@@ -41,7 +42,7 @@ public class BirdController {
         }
     }
     @GetMapping(ConstantAPI.GET_BIRD_BY_ID + ConstantParametter.BIRD_ID)
-    public ResponseEntity<Product> getBirdByID(@PathVariable ("BirdID") String BirdID) throws CustomException {
+    public ResponseEntity<BirdResponse> getBirdByID(@PathVariable ("BirdID") String BirdID) throws CustomException {
         try {
             return new ResponseEntity<>(birdService.findBirdByBirdID(BirdID), HttpStatus.OK);
         }
@@ -52,7 +53,7 @@ public class BirdController {
     }
 
     @GetMapping(ConstantAPI.GET_ALL_BIRD)
-    public ResponseEntity<List<Product>> getAllBird() throws CustomException {
+    public ResponseEntity<List<BirdResponse>> getAllBird() throws CustomException {
         try {
             return new ResponseEntity<>(birdService.findAllBird(), HttpStatus.OK);
         }

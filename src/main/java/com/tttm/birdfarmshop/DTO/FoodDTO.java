@@ -23,4 +23,5 @@ public class FoodDTO {
     private String feedback;
 
     private Integer rating;
+    private Integer quantity;
 }

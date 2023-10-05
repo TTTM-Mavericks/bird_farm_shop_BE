@@ -39,4 +39,7 @@ public class Product {
 
   @Column(name = "productStatus", unique = false, nullable = false)
   private ProductStatus productStatus;
+
+  @Column(name = "quantity", unique = false, nullable = false)
+  private Integer quantity;
 }

@@ -42,47 +42,63 @@ public class FoodServiceImpl implements FoodService {
                     dto.getImages(),
                     dto.getFeedback(),
                     dto.getRating(),
-                    ProductStatus.AVAILABLE
+                    ProductStatus.AVAILABLE,
+                    dto.getQuantity()
             ));
 
             foodRepository.save(new Food(FoodID));
-            return new MessageResponse("Add new Food Successfully");
+            return new MessageResponse("Success");
         }
-        return new MessageResponse("Fail to Add new Food");
+        return new MessageResponse("Fail");
     }
 
     @Override
     public MessageResponse UpdateFood(String productID, FoodDTO dto) {
-        if(productRepository.findById(productID).get() == null)
-        {
-            return new MessageResponse("FoodID is not existed");
-        }
-        if(isValidFood(dto))
-        {
+        try {
+            Optional<Product> productOptional = productRepository.findById(productID);
+            if(productOptional.isEmpty() || !isValidFood(dto))
+            {
+                return new MessageResponse("Fail");
+            }
             return new MessageResponse(
                     Optional
-                        .ofNullable(productRepository.findById(productID).get())
-                        .map(food ->{
-                            food.setProductName(dto.getProductName());
-                            food.setPrice(dto.getPrice());
-                            food.setDescription(dto.getDescription());
-                            food.setTypeOfProduct(dto.getTypeOfProduct());
-                            food.setImages(dto.getImages());
-                            food.setFeedback(dto.getFeedback());
-                            food.setRating(dto.getRating());
-                            productRepository.save(food);
-                            return "Update Food Successfully";
-                        })
-                        .orElse("Fail to update Food")
-            );
+                            .ofNullable(productRepository.findById(productID).get())
+                            .map(food ->{
+                                food.setProductName(dto.getProductName());
+                                food.setPrice(dto.getPrice());
+                                food.setDescription(dto.getDescription());
+                                food.setTypeOfProduct(dto.getTypeOfProduct());
+                                food.setImages(dto.getImages());
+                                food.setFeedback(dto.getFeedback());
+                                food.setRating(dto.getRating());
+                                food.setQuantity(dto.getQuantity());
+                                productRepository.save(food);
+                                return "Success";
+                            })
+                            .orElse("Fail")
+                );
         }
-        else return new MessageResponse("Invalid type of input. Fail to update Type Of Food");
+        catch (Exception ex)
+        {
+            return new MessageResponse("Fail");
+        }
     }
 
     @Override
     public Product findFoodByFoodID(String foodID) {
-        return productRepository.findById(foodID)
-                .orElseThrow(() -> new NotFoundException("Food not Found with ID: " + foodID));
+        try
+        {
+            Optional<Product> foodOptional = productRepository.findById(foodID);
+            if(foodOptional.isPresent())
+            {
+                return foodOptional.get();
+            }
+            else return new Product();
+        }
+        catch (Exception e)
+        {
+            return new Product();
+        }
     }
 
     @Override
