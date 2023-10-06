@@ -7,6 +7,7 @@ import com.tttm.birdfarmshop.Exception.CustomException;
 import com.tttm.birdfarmshop.Models.TypeOfBird;
 import com.tttm.birdfarmshop.Service.TypeOfBirdService;
 import com.tttm.birdfarmshop.Utils.Response.MessageResponse;
+import com.tttm.birdfarmshop.Utils.Response.TypeOfBirdResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -41,7 +42,7 @@ public class TypeOfBirdController {
         }
     }
     @GetMapping(ConstantAPI.GET_TYPE_OF_BIRD_BY_ID + ConstantParametter.TYPE_OF_BIRD_ID)
-    public ResponseEntity<TypeOfBird> getTypeOfBirdByID(@PathVariable ("TypeID") String TypeID) throws CustomException {
+    public ResponseEntity<TypeOfBirdResponse> getTypeOfBirdByID(@PathVariable ("TypeID") String TypeID) throws CustomException {
         try {
             return new ResponseEntity<>(typeOfBirdService.findTypeOfBirdByID(TypeID), HttpStatus.OK);
         }
@@ -52,7 +53,7 @@ public class TypeOfBirdController {
     }
 
     @GetMapping(ConstantAPI.GET_ALL_TYPE_OF_BIRD)
-    public ResponseEntity<List<TypeOfBird>> getAllTypeOfBird() throws CustomException {
+    public ResponseEntity<List<TypeOfBirdResponse>> getAllTypeOfBird() throws CustomException {
         try {
             return new ResponseEntity<>(typeOfBirdService.findAllTypeOfBird(), HttpStatus.OK);
         }

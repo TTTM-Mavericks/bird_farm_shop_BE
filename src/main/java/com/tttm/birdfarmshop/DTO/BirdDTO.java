@@ -22,6 +22,8 @@ public class BirdDTO {
 
     private Integer rating;
 
+    private Integer quantity;
+
     private Integer age;
 
     private Boolean gender;

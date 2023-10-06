@@ -1,4 +1,4 @@
-package com.tttm.birdfarmshop.DTO;
+package com.tttm.birdfarmshop.Utils.Response;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -7,7 +7,9 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class NestDTO {
+public class BirdResponse {
+    private String productID;
+
     private String productName;
 
     private Double price;
@@ -22,4 +24,14 @@ public class NestDTO {
 
     private Integer rating;
     private Integer quantity;
+
+    private Integer age;
+
+    private Boolean gender;
+
+    private Boolean fertility;
+
+    private String typeOfBirdID;
+
+    private Integer healthcareProfessionalID;
 }
