@@ -32,4 +32,5 @@ public interface UserRepository extends JpaRepository<User, Integer> {
             value = " select * from user where role = ?1", nativeQuery = true
     )
     List<User> getAllUsersBasedOnRole(String role);
+
 }
