@@ -19,6 +19,7 @@ public class ConstantAPI {
     public static final String FOOD = "/food";
     public static final String NEST = "/nest";
     public static final String BIRD = "/bird";
+    public static final String ORDER = "/order";
 
     // Function
     public static final String LOGIN = "/login";
@@ -54,4 +55,9 @@ public class ConstantAPI {
     public static final String UPDATE_BIRD = "/updateBird";
     public static final String GET_BIRD_BY_ID = "/getBirdByID";
     public static final String GET_ALL_BIRD = "/getAllBird";
+
+    //Order Function
+    public static final String CREATE_ORDER = "/createOrder";
+    public static final String GET_ORDER_BY_ID = "/getOrderByID";
+    public static final String GET_ALL_ORDER = "/getAllOrder";
 }

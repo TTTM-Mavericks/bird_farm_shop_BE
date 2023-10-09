@@ -1,5 +1,8 @@
 package com.tttm.birdfarmshop.Enums;
 
 public enum OrderStatus {
-  Pendding
+  NOT_COMPLETED,
+  PENDING,
+  PROCESSING,
+  COMPLETED
 }

@@ -23,4 +23,9 @@ public class OrderDetail {
   @ManyToOne
   @JoinColumn(name = "orderID")
   private Order order;
+
+  public OrderDetail(Product product, Order order) {
+    this.product = product;
+    this.order = order;
+  }
 }

@@ -52,4 +52,16 @@ public class Order {
   @JoinColumn(name = "shipperID")
   private Shipper shipper;
 
+  public Order(String customerPhone, String customerName, String customerEmail, String customerAddress, String note, OrderStatus status, Float amount, Date orderDate, Customer customer, Shipper shipper) {
+    this.customerPhone = customerPhone;
+    this.customerName = customerName;
+    this.customerEmail = customerEmail;
+    this.customerAddress = customerAddress;
+    this.note = note;
+    this.status = status;
+    this.amount = amount;
+    this.orderDate = orderDate;
+    this.customer = customer;
+    this.shipper = shipper;
+  }
 }

@@ -36,48 +36,4 @@ public class EmailController {
             return new ResponseEntity<>(new AuthenticationResponse(ex.getMessage()), HttpStatus.NOT_IMPLEMENTED);
         }
     }
-
-//    @PostMapping(ConstantAPI.SEND_CODE)
-//    public ResponseEntity<String> sendCode(@RequestBody String json, HttpSession session) throws CustomException
-//    {
-//        try
-//        {
-//            ObjectMapper mapper = new ObjectMapper();
-//            MailDTO dto = mapper.readValue(json, MailDTO.class);
-//
-//            User user = (User) session.getAttribute(dto.getEmail());
-//            String token = (String) session.getAttribute(user.toString());
-//            if(token != null)
-//            {
-//                // Generate Code to Send Mail
-//                String code = mailService.SendCode(dto.getEmail());
-//                dto.setCode(code);
-//
-//                // Store Code in Session exist in 60 seconds
-//                codeStorageService.storeCodeInSession(dto, session);
-//                return new ResponseEntity<>(code, HttpStatus.OK);
-//            }
-//        }
-//        catch (JsonProcessingException ex)
-//        {
-//            return new ResponseEntity<>(ex.getMessage(), HttpStatus.NOT_IMPLEMENTED);
-//        }
-//        return new ResponseEntity<>("Empty Register", HttpStatus.OK);
-//    }
-//
-//    @PostMapping(ConstantAPI.VERIFY_CODE)
-//    public ResponseEntity<String> verifyCode(@RequestBody String json, HttpSession session) throws CustomException
-//    {
-//        try
-//        {
-//            ObjectMapper mapper = new ObjectMapper();
-//            MailDTO dto = mapper.readValue(json, MailDTO.class);
-//            return new ResponseEntity<>(codeStorageService.getCodeFromSession(dto, session), HttpStatus.OK);
-//        }
-//        catch (JsonProcessingException ex)
-//        {
-//            return new ResponseEntity<>(new AuthenticationResponse(ex.getMessage()), HttpStatus.NOT_IMPLEMENTED);
-//        }
-//    }
-
 }
