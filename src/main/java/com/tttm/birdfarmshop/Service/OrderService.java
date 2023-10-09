@@ -10,4 +10,6 @@ public interface OrderService {
     OrderResponse createOrder(OrderRequest orderRequest);
     OrderResponse getOrderByOrderID(Integer OrderID);
     List<OrderResponse> getAllOrder();
+
+    MessageResponse DeleteOrder(Integer OrderID);
 }

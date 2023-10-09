@@ -20,6 +20,7 @@ public class ConstantAPI {
     public static final String NEST = "/nest";
     public static final String BIRD = "/bird";
     public static final String ORDER = "/order";
+    public static final String VOUCHER = "/voucher";
 
     // Function
     public static final String LOGIN = "/login";
@@ -60,4 +61,12 @@ public class ConstantAPI {
     public static final String CREATE_ORDER = "/createOrder";
     public static final String GET_ORDER_BY_ID = "/getOrderByID";
     public static final String GET_ALL_ORDER = "/getAllOrder";
+    public static final String DELETE_ORDER = "/deleteOrder";
+
+    //Voucher Function
+    public static final String CREATE_VOUCHER = "/createVoucher";
+    public static final String GET_VOUCHER_BY_ID = "/getVoucherByID";
+    public static final String GET_ALL_VOUCHER = "/getAllVoucher";
+    public static final String UPDATE_VOUCHER = "/updateVoucher";
+
 }

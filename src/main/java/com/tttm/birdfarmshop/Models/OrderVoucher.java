@@ -23,4 +23,9 @@ public class OrderVoucher {
     @ManyToOne
     @JoinColumn(name = "voucherID")
     private Voucher voucher;
+
+    public OrderVoucher(Order order, Voucher voucher) {
+        this.order = order;
+        this.voucher = voucher;
+    }
 }

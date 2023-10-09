@@ -2,7 +2,9 @@ package com.tttm.birdfarmshop.Repository;
 
 import com.tttm.birdfarmshop.Models.Order;
 import com.tttm.birdfarmshop.Models.OrderDetail;
+import io.lettuce.core.dynamic.annotation.Param;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
@@ -14,4 +16,8 @@ public interface OrderDetailRepository extends JpaRepository<OrderDetail, Intege
             value = "select * from order_detail where orderid = ?1", nativeQuery = true
     )
     List<OrderDetail> findAllOrderDetailByOrderID(Integer orderID);
+
+    @Modifying
+    @Query(value = "delete from `order_detail` where orderid = ?1", nativeQuery = true)
+    void deleteOrderDetailByOrderID(Integer orderID);
 }
