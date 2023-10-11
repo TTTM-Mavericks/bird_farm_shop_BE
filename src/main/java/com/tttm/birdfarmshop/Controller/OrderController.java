@@ -3,9 +3,9 @@ package com.tttm.birdfarmshop.Controller;
 import com.tttm.birdfarmshop.Constant.ConstantAPI;
 import com.tttm.birdfarmshop.Constant.ConstantParametter;
 import com.tttm.birdfarmshop.Exception.CustomException;
-import com.tttm.birdfarmshop.Models.Product;
 import com.tttm.birdfarmshop.Service.OrderService;
 import com.tttm.birdfarmshop.Utils.Request.OrderRequest;
+import com.tttm.birdfarmshop.Utils.Response.MessageResponse;
 import com.tttm.birdfarmshop.Utils.Response.OrderResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -45,6 +45,17 @@ public class OrderController {
     public ResponseEntity<List<OrderResponse>> getAllOrder() throws CustomException {
         try {
             return new ResponseEntity<>(orderService.getAllOrder(), HttpStatus.OK);
+        }
+        catch (Exception ex)
+        {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @DeleteMapping(ConstantAPI.DELETE_ORDER + ConstantParametter.ORDER_ID)
+    public ResponseEntity<MessageResponse> deleteOrder(@PathVariable ("OrderID") Integer OrderID) throws CustomException {
+        try {
+            return new ResponseEntity<>(orderService.DeleteOrder(OrderID), HttpStatus.OK);
         }
         catch (Exception ex)
         {

@@ -32,7 +32,7 @@ public class SecurityConfigure {
                             auth.requestMatchers("/auth/**")
                                     .permitAll();
 
-                            auth.requestMatchers("/typeOfBird/**, /food/**, /nest/**, /bird/**, /order/**")
+                            auth.requestMatchers("/typeOfBird/**, /food/**, /nest/**, /bird/**, /order/**, /voucher/**")
                                     .permitAll();
 
                             auth.requestMatchers("/email/**")

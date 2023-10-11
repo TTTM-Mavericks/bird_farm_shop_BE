@@ -24,4 +24,6 @@ public class OrderRequest {
     private String note;
 
     private List<String> listProduct;  // Store List of Product ID
+
+    private List<String> voucherList;  // List of Voucher ID
 }

@@ -1,13 +1,15 @@
 package com.tttm.birdfarmshop.Service.Impl;
 
-import com.tttm.birdfarmshop.Enums.ERole;
 import com.tttm.birdfarmshop.Enums.OrderStatus;
+import com.tttm.birdfarmshop.Enums.ProductStatus;
+import com.tttm.birdfarmshop.Enums.VoucherStatus;
 import com.tttm.birdfarmshop.Models.*;
 import com.tttm.birdfarmshop.Repository.*;
 import com.tttm.birdfarmshop.Service.OrderService;
 import com.tttm.birdfarmshop.Utils.Request.OrderRequest;
 import com.tttm.birdfarmshop.Utils.Response.MessageResponse;
 import com.tttm.birdfarmshop.Utils.Response.OrderResponse;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,9 +27,11 @@ public class OrderServiceImpl implements OrderService {
     private final OrderRepository orderRepository;
     private final OrderDetailRepository orderDetailRepository;
     private final ProductRepository productRepository;
-    private final UserRepository userRepository;
+    private final OrderVoucherRepository orderVoucherRepository;
     private final CustomerRepository customerRepository;
     private final ShipperRepository shipperRepository;
+    private final VoucherRepository voucherRepository;
+    private final UserRepository userRepository;
     private final Logger logger = LoggerFactory.getLogger(OrderServiceImpl.class);
 
     private boolean isValidInformation(OrderRequest orderRequest)
@@ -39,12 +43,15 @@ public class OrderServiceImpl implements OrderService {
                 orderRequest.getListProduct().size() >= 1;
 
     }
+
+
     @Override
     public OrderResponse createOrder(OrderRequest orderRequest) {
         Optional<Customer> customer = customerRepository.findById(orderRequest.getCustomerID()); // // Check Product ID is existed or not
-        if(customer.isEmpty() || !isValidInformation(orderRequest)) // Check validation fields
+        Optional<User> user =  userRepository.findById(orderRequest.getCustomerID());
+        if(customer.isEmpty() || !isValidInformation(orderRequest) || user.get().getAccountStatus() == true) // Check validation fields
         {
-            logger.info("Customer ID or Order Information is Invalid");
+            logger.info("Customer ID, Order Information is Invalid or Your Account is banned");
             return new OrderResponse();
         }
 
@@ -56,13 +63,38 @@ public class OrderServiceImpl implements OrderService {
             Optional<Product> product = productRepository.findById(productID);
             if (product.isPresent())
             {
-                productList.add(product.get());
-                orderAmount += product.get().getPrice();
+                if(product.get().getProductStatus().toString().equals(ProductStatus.UNAVAILABLE.toString()))
+                {
+                    logger.info("Product ID is Unavailable");
+                    return new OrderResponse();
+                }
+                else {
+                    productList.add(product.get());
+                    orderAmount += product.get().getPrice();
+                }
             }
             else
             {
                 logger.info("Product ID is not existed");
                 return new OrderResponse();
+            }
+        }
+
+        // Apply Voucher to the Order
+        List<Voucher> voucherList = new ArrayList<>();
+        List<String> voucherStringList = orderRequest.getVoucherList();
+        for(String voucherID : voucherStringList)
+        {
+            Optional<Voucher> voucher = voucherRepository.findById(Integer.parseInt(voucherID));
+            if(voucher.isEmpty() || voucher.get().getVoucherStatus().equals(VoucherStatus.UNAVAILABLE))
+            {
+                logger.info("Voucher ID is not existed to apply voucher");
+                return new OrderResponse();
+            }
+            else // Apply Voucher to Order
+            {
+                orderAmount -= voucher.get().getValue();
+                voucherList.add(voucher.get());
             }
         }
 
@@ -72,7 +104,7 @@ public class OrderServiceImpl implements OrderService {
         // Choose random shipper to take care the Order
         List<Shipper> shipperList = shipperRepository.findAll();
         Random random = new Random();
-        int randomShipperIndex = random.nextInt(shipperList.size() - 1 - 0 + 1) + 0;
+        int randomShipperIndex = random.nextInt(shipperList.size());
         Shipper shipper = shipperList.get(randomShipperIndex);
 
         orderRepository.save(
@@ -96,8 +128,16 @@ public class OrderServiceImpl implements OrderService {
         Order newestOrder = orders.get(size - 1);
 
         productList.forEach(product ->
-            orderDetailRepository.save(new OrderDetail(product, newestOrder))
+            {
+                product.setProductStatus(ProductStatus.UNAVAILABLE);
+                productRepository.save(product);
+                orderDetailRepository.save(new OrderDetail(product, newestOrder));
+            }
         );
+
+        voucherList.forEach(voucher -> {
+            orderVoucherRepository.save(new OrderVoucher(newestOrder, voucher));
+        });
 
         return createOrderResponse(newestOrder, productList);
     }
@@ -130,7 +170,7 @@ public class OrderServiceImpl implements OrderService {
                 .collect(Collectors.toList());
     }
 
-    private OrderResponse createOrderResponse(Order newestOrder,  List<Product> productList)
+    private OrderResponse createOrderResponse(Order newestOrder, List<Product> productList)
     {
         return new OrderResponse(
                 newestOrder.getOrderID(),
@@ -144,5 +184,70 @@ public class OrderServiceImpl implements OrderService {
                 newestOrder.getOrderDate(),
                 productList
         );
+    }
+
+    @Transactional
+    @Override
+    public MessageResponse DeleteOrder(Integer OrderID) {
+        Optional<Order> order = orderRepository.findById(OrderID);
+
+        if(order.isEmpty())
+        {
+            return new MessageResponse("Fail");
+        }
+        Customer customer = order.get().getCustomer();
+        User user = userRepository.findById(customer.getCustomerID()).get();
+
+        if(user.getAccountStatus() == true)
+        {
+            return new MessageResponse("Fail");
+        }
+
+        List<OrderDetail> orderDetailList = orderDetailRepository.findAllOrderDetailByOrderID(OrderID);
+        if(orderDetailList.size() == 0)
+        {
+            return new MessageResponse("Fail");
+        }
+
+        List<Product> productList = orderDetailList
+                    .stream()
+                    .map(OrderDetail::getProduct)
+                    .collect(Collectors.toList());
+
+        // Update the status of Product
+        productList.forEach(
+                product -> {
+                    product.setProductStatus(ProductStatus.AVAILABLE);
+                    productRepository.save(product);
+                }
+        );
+
+        // Delete OrderVoucher by Order ID
+        orderVoucherRepository.deleteOrderVoucherByOrderID(OrderID);
+
+        // Delete OrderDetail by Order ID
+        orderDetailRepository.deleteOrderDetailByOrderID(OrderID);
+
+        // Delete Order By OrderID
+        orderRepository.deleteOrderByOrderID(OrderID);
+
+        // Check if Customer Cancel Order exceed specific times
+
+        int numberCancleOrder = customer.getNumberCancleOrder();
+        String message = "Success";
+        if(numberCancleOrder + 1 == 3)
+        {
+            message = "Cancel more than 3 times. Your account will be banned";
+        }
+        else if(numberCancleOrder + 1 > 3)
+        {
+            message = "Your account has been Banned";
+            user.setAccountStatus(true);
+            userRepository.save(user);
+        }
+        customer.setNumberCancleOrder(numberCancleOrder + 1);
+        customerRepository.save(customer);
+
+        return new MessageResponse(message);
     }
 }
