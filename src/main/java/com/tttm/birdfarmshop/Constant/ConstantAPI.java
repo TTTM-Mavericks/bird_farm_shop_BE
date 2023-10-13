@@ -56,6 +56,8 @@ public class ConstantAPI {
     public static final String UPDATE_BIRD = "/updateBird";
     public static final String GET_BIRD_BY_ID = "/getBirdByID";
     public static final String GET_ALL_BIRD = "/getAllBird";
+    public static final String MATCHING_BIRD_FROM_SAME_OWNER = "/matchingSameOwner";
+    public static final String MATCHING_BIRD_FROM_DIFFERENT_OWNER = "/matchingDifferentOwner";
 
     //Order Function
     public static final String CREATE_ORDER = "/createOrder";

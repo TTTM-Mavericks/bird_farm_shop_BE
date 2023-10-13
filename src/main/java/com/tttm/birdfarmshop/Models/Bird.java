@@ -1,5 +1,6 @@
 package com.tttm.birdfarmshop.Models;
 
+import com.tttm.birdfarmshop.Enums.BirdColor;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -26,6 +27,12 @@ public class Bird {
 
   @Column(name = "fertility", nullable = false, unique = false)
   private Boolean fertility;
+
+  @Column(name = "breedingTimes", nullable = true, unique = false)
+  private Integer BreedingTimes;
+
+  @Column(name = "color", nullable = true, unique = false)
+  private BirdColor color;
 
   @OneToOne
   @JoinColumn(name = "birdID", referencedColumnName = "productID", insertable = false, updatable = false)
