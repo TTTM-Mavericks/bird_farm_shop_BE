@@ -28,6 +28,8 @@ public class ConstantAPI {
     public static final String FORGOT_PASSWORD = "/forgotPassword";
     public static final String SEND_CODE = "/sendCode";
     public static final String VERIFY_CODE = "/verifyCode";
+    public static final String REFRESH_TOKEN = "/refresh-token";
+    public static final String LOG_OUT = "/refresh-token";
     public static final String GET_ALL_CUSTOMERS = "/getAllCustomers";
     public static final String GET_ALL_USERS = "/getAllUsers";
     public static final String BAN_USER_ACCOUNT = "/banUserAccount";

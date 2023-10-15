@@ -1,5 +1,6 @@
 package com.tttm.birdfarmshop.Service.Impl;
 
+import com.tttm.birdfarmshop.Enums.AccountStatus;
 import com.tttm.birdfarmshop.Models.Admin;
 import com.tttm.birdfarmshop.Enums.ERole;
 import com.tttm.birdfarmshop.Models.User;
@@ -46,7 +47,7 @@ public class AdminServiceImpl implements AdminService {
         User user = userRepository.findById(UserID).get();
         if(user != null)
         {
-            user.setAccountStatus(true);
+            user.setAccountStatus(AccountStatus.INACTIVE);
             userRepository.save(user);
             logger.info("Ban User with User ID {} Successfully", UserID);
         }
@@ -58,7 +59,7 @@ public class AdminServiceImpl implements AdminService {
         User user = userRepository.findById(UserID).get();
         if(user != null)
         {
-            user.setAccountStatus(false);
+            user.setAccountStatus(AccountStatus.ACTIVE);
             userRepository.save(user);
             logger.info("UnBan User with User ID {} Successfully", UserID);
         }

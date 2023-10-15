@@ -12,11 +12,15 @@ import com.tttm.birdfarmshop.Utils.Request.AuthenticationRequest;
 import com.tttm.birdfarmshop.Utils.Response.AuthenticationResponse;
 import com.tttm.birdfarmshop.Exception.CustomException;
 import com.tttm.birdfarmshop.Utils.Response.MessageResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.io.IOException;
 
 @RestController
 @RequiredArgsConstructor
@@ -50,8 +54,8 @@ public class AuthController {
         }
     }
 
-    @PostMapping("/verifyCode")
-    public ResponseEntity<AuthenticationResponse> verifyCode(@RequestBody String json, HttpSession session) throws CustomException
+    @PostMapping(ConstantAPI.VERIFY_CODE)
+    public ResponseEntity<MessageResponse> verifyCode(@RequestBody String json, HttpSession session) throws CustomException
     {
         try
         {
@@ -61,8 +65,13 @@ public class AuthController {
         }
         catch (JsonProcessingException ex)
         {
-            return new ResponseEntity<>(new AuthenticationResponse(ex.getMessage()), HttpStatus.NOT_IMPLEMENTED);
+            return new ResponseEntity<>(new MessageResponse(ex.getMessage()), HttpStatus.NOT_IMPLEMENTED);
         }
+    }
+
+    @PostMapping(ConstantAPI.REFRESH_TOKEN)
+    public ResponseEntity<AuthenticationResponse> refreshToken(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        return ResponseEntity.ok(authenticationService.refreshToken(request, response));
     }
 
 }

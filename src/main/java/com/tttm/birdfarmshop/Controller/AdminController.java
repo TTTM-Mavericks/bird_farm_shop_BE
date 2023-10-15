@@ -12,6 +12,7 @@ import com.tttm.birdfarmshop.Exception.CustomException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -22,18 +23,6 @@ import java.util.List;
 public class AdminController {
     private final AuthenticationService authenticationService;
     private final AdminService adminService;
-
-    @PostMapping(ConstantAPI.LOGIN)
-    public ResponseEntity<AuthenticationResponse> login(@RequestBody AuthenticationRequest user) throws CustomException {
-        try {
-            return new ResponseEntity<>(authenticationService.login(user), HttpStatus.OK);
-        }
-        catch (Exception ex)
-        {
-            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
-        }
-    }
-
     @GetMapping(ConstantAPI.GET_ALL_CUSTOMERS)
     public ResponseEntity<List<User>> getAllCustomers() throws CustomException {
         try {

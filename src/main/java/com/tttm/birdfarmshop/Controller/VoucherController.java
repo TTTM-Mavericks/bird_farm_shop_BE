@@ -10,6 +10,7 @@ import com.tttm.birdfarmshop.Utils.Response.VoucherResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -21,7 +22,7 @@ public class VoucherController {
     private final VoucherService voucherService;
 
     @PostMapping(ConstantAPI.CREATE_VOUCHER)
-    public ResponseEntity<MessageResponse> addTypeOfBird(@RequestBody VoucherRequest dto) throws CustomException {
+    public ResponseEntity<MessageResponse> createVoucher(@RequestBody VoucherRequest dto) throws CustomException {
         try {
             return new ResponseEntity<>(voucherService.createVoucher(dto), HttpStatus.OK);
         }

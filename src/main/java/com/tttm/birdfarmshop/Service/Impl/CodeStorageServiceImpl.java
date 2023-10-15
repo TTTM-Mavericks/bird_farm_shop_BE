@@ -2,9 +2,13 @@ package com.tttm.birdfarmshop.Service.Impl;
 
 import com.tttm.birdfarmshop.Constant.ConstantMessage;
 import com.tttm.birdfarmshop.DTO.MailDTO;
+import com.tttm.birdfarmshop.Enums.AccountStatus;
 import com.tttm.birdfarmshop.Enums.ERole;
+import com.tttm.birdfarmshop.Enums.TokenType;
 import com.tttm.birdfarmshop.Exception.CustomException;
+import com.tttm.birdfarmshop.Models.Token;
 import com.tttm.birdfarmshop.Models.User;
+import com.tttm.birdfarmshop.Repository.TokenRepository;
 import com.tttm.birdfarmshop.Repository.UserRepository;
 import com.tttm.birdfarmshop.Service.*;
 import com.tttm.birdfarmshop.Utils.Response.AuthenticationResponse;
@@ -41,6 +45,8 @@ public class CodeStorageServiceImpl implements CodeStorageService {
 
     private final ShipperService shipperService;
 
+    private final TokenRepository tokenRepository;
+
     private final MailService mailService;
 
     private final SellerService sellerService;
@@ -49,20 +55,23 @@ public class CodeStorageServiceImpl implements CodeStorageService {
     private static final Logger logger = LogManager.getLogger(AuthenticationServiceImpl.class);
 
     @Override
-    public AuthenticationResponse getCodeFromSession(MailDTO dto, HttpSession session) {
+    public MessageResponse getCodeFromSession(MailDTO dto, HttpSession session) {
         Long expirationTime = EmailAndExpiration.get(dto.getEmail());
         if(expirationTime != null && expirationTime < System.currentTimeMillis()) // Check the Expiration Time for each Keys store in KeySessions
         {
             EmailAndCode.remove(dto.getEmail());
             EmailAndExpiration.remove(dto.getEmail());
-            return new AuthenticationResponse("The Code is Expired.");
+            return new MessageResponse("The Code is Expired.");
         }
         String code = (String) EmailAndCode.get(dto.getEmail());
         if(code.equals(dto.getCode())) // Compare Code from System with Customer
         {
             User user = (User) session.getAttribute(dto.getEmail());
+            var savedUser = userRepository.save(user);
 
-            userRepository.save(user);
+            var accessToken = jwtService.generateToken(user);
+            var refreshToken = jwtService.generateRefreshToken(user);
+            saveUserToken(savedUser, accessToken);
 
             var jwtToken = jwtService.generateToken(user);
 
@@ -92,9 +101,36 @@ public class CodeStorageServiceImpl implements CodeStorageService {
             session.removeAttribute(dto.getEmail());
             session.removeAttribute(user.toString());
 
-            return AuthenticationResponse.builder().token(jwtToken).build();
+            return new MessageResponse("Success Register Account");
         }
-        return new AuthenticationResponse("Invalid Code");
+        return new MessageResponse("Invalid Code");
+    }
+
+    private void saveUserToken(User user, String jwtToken)
+    {
+        var token = Token.builder()
+                .user(user)
+                .token(jwtToken)
+                .tokenType(TokenType.BEARER)
+                .revoked(false)
+                .expired(false)
+                .build();
+
+        tokenRepository.save(token);
+    }
+
+    private void revokeAllUserTokens(User user)
+    {
+        var validUserTokens = tokenRepository.findAllValidTokenByUser(user.getUserID());
+        if(validUserTokens.isEmpty())
+        {
+            return;
+        }
+        validUserTokens.forEach(t -> {
+            t.setExpired(true);
+            t.setRevoked(true);
+        });
+        tokenRepository.saveAll(validUserTokens);
     }
 
     @Override
@@ -138,7 +174,7 @@ public class CodeStorageServiceImpl implements CodeStorageService {
                 dto.getGender(),
                 dto.getDateOfBirth(),
                 dto.getAddress(),
-                false,
+                AccountStatus.ACTIVE,
                 role
         );
         var jwtToken = jwtService.generateToken(user);
