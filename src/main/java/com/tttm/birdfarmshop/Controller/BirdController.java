@@ -60,7 +60,6 @@ public class BirdController {
     }
 
     @PostMapping(ConstantAPI.MATCHING_BIRD_FROM_SAME_OWNER)
-    @PreAuthorize("permitAll()")
     public ResponseEntity<MessageResponse> matchingSameOwner(@RequestBody BirdMatchingRequest bird)
         throws CustomException {
         try {
@@ -70,7 +69,6 @@ public class BirdController {
         }
     }
     @PostMapping(ConstantAPI.MATCHING_BIRD_FROM_DIFFERENT_OWNER)
-    @PreAuthorize("permitAll()")
     public ResponseEntity<MessageResponse> matchingDifferentOwner(@RequestBody BirdRequest bird)
             throws CustomException {
         try {

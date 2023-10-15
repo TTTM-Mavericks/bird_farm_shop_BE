@@ -56,66 +56,81 @@ public class SecurityConfigure {
                 .authorizeHttpRequests((authorize) ->
                         authorize
                                 .requestMatchers(
-                                        antMatcher("/email/**")
+                                        antMatcher("/typeOfBird/**"),
+                                        antMatcher("/food/**"),
+                                        antMatcher("/nest/**"),
+                                        antMatcher("/bird/**"),
+                                        antMatcher("/voucher/**"),
+                                        antMatcher("/order/**"),
+                                        antMatcher("/email/**"),
+                                        antMatcher("/admin/**")
                                 )
                                 .permitAll()
                 )
 
-                .authorizeHttpRequests((authorize) ->
-                        authorize
-                                .requestMatchers(
-                                        antMatcher("/order/**")
-                                )
-                                .hasAnyRole(ERole.ADMINISTRATOR.name(), ERole.HEALTHCAREPROFESSIONAL.name(), ERole.CUSTOMER.name(), ERole.SHIPPER.name(), ERole.SELLER.name())
-                )
-
-                .authorizeHttpRequests((authorize) ->
-                        authorize
-                                .requestMatchers(
-                                        antMatcher(HttpMethod.GET,"/typeOfBird/**"),
-                                        antMatcher(HttpMethod.GET,"/food/**"),
-                                        antMatcher(HttpMethod.GET,"/nest/**"),
-                                        antMatcher(HttpMethod.GET,"/bird/**"),
-                                        antMatcher(HttpMethod.GET,"/voucher/**")
-                                )
-                                .permitAll()
-                )
-
-                .authorizeHttpRequests((authorize) -> authorize
-                        .requestMatchers("/admin/**")
-                        .hasRole(ERole.ADMINISTRATOR.name())
-                )
-
-                .authorizeHttpRequests((authorize) ->
-                        authorize
-                                .requestMatchers(
-                                        antMatcher(HttpMethod.POST, "/typeOfBird/**"),
-                                        antMatcher(HttpMethod.POST, "/food/**"),
-                                        antMatcher(HttpMethod.POST, "/nest/**"),
-                                        antMatcher(HttpMethod.POST, "/bird/**")
-                                )
-                                .hasAnyRole(ERole.ADMINISTRATOR.name(), ERole.HEALTHCAREPROFESSIONAL.name())
-                )
-
-                .authorizeHttpRequests((authorize) ->
-                        authorize
-                                .requestMatchers(
-                                        antMatcher(HttpMethod.PUT, "/typeOfBird/**"),
-                                        antMatcher(HttpMethod.PUT, "/food/**"),
-                                        antMatcher(HttpMethod.PUT, "/nest/**"),
-                                        antMatcher(HttpMethod.PUT, "/bird/**")
-                                )
-                                .hasAnyRole(ERole.ADMINISTRATOR.name(), ERole.HEALTHCAREPROFESSIONAL.name())
-                )
-
-                .authorizeHttpRequests((authorize) ->
-                        authorize
-                                .requestMatchers(
-                                        antMatcher(HttpMethod.POST, "/voucher/**"),
-                                        antMatcher(HttpMethod.PUT, "/voucher/**")
-                                )
-                                .hasAnyRole(ERole.ADMINISTRATOR.name(), ERole.SELLER.name())
-                )
+//                .authorizeHttpRequests((authorize) ->
+//                        authorize
+//                                .requestMatchers(
+//                                        antMatcher("/email/**")
+//                                )
+//                                .permitAll()
+//                )
+//
+//                .authorizeHttpRequests((authorize) ->
+//                        authorize
+//                                .requestMatchers(
+//                                        antMatcher("/order/**")
+//                                )
+//                                .hasAnyRole(ERole.ADMINISTRATOR.name(), ERole.HEALTHCAREPROFESSIONAL.name(), ERole.CUSTOMER.name(), ERole.SHIPPER.name(), ERole.SELLER.name())
+//                )
+//
+//                .authorizeHttpRequests((authorize) ->
+//                        authorize
+//                                .requestMatchers(
+//                                        antMatcher(HttpMethod.GET,"/typeOfBird/**"),
+//                                        antMatcher(HttpMethod.GET,"/food/**"),
+//                                        antMatcher(HttpMethod.GET,"/nest/**"),
+//                                        antMatcher(HttpMethod.GET,"/bird/**"),
+//                                        antMatcher(HttpMethod.GET,"/voucher/**")
+//                                )
+//                                .permitAll()
+//                )
+//
+//                .authorizeHttpRequests((authorize) -> authorize
+//                        .requestMatchers("/admin/**")
+//                        .hasRole(ERole.ADMINISTRATOR.name())
+//                )
+//
+//                .authorizeHttpRequests((authorize) ->
+//                        authorize
+//                                .requestMatchers(
+//                                        antMatcher(HttpMethod.POST, "/typeOfBird/**"),
+//                                        antMatcher(HttpMethod.POST, "/food/**"),
+//                                        antMatcher(HttpMethod.POST, "/nest/**"),
+//                                        antMatcher(HttpMethod.POST, "/bird/**")
+//                                )
+//                                .hasAnyRole(ERole.ADMINISTRATOR.name(), ERole.HEALTHCAREPROFESSIONAL.name())
+//                )
+//
+//                .authorizeHttpRequests((authorize) ->
+//                        authorize
+//                                .requestMatchers(
+//                                        antMatcher(HttpMethod.PUT, "/typeOfBird/**"),
+//                                        antMatcher(HttpMethod.PUT, "/food/**"),
+//                                        antMatcher(HttpMethod.PUT, "/nest/**"),
+//                                        antMatcher(HttpMethod.PUT, "/bird/**")
+//                                )
+//                                .hasAnyRole(ERole.ADMINISTRATOR.name(), ERole.HEALTHCAREPROFESSIONAL.name())
+//                )
+//
+//                .authorizeHttpRequests((authorize) ->
+//                        authorize
+//                                .requestMatchers(
+//                                        antMatcher(HttpMethod.POST, "/voucher/**"),
+//                                        antMatcher(HttpMethod.PUT, "/voucher/**")
+//                                )
+//                                .hasAnyRole(ERole.ADMINISTRATOR.name(), ERole.SELLER.name())
+//                )
 
                 .sessionManagement(session -> session.sessionCreationPolicy(STATELESS))
                 .httpBasic(Customizer.withDefaults())
