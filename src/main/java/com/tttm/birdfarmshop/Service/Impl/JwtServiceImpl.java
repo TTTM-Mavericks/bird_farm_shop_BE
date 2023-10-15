@@ -6,6 +6,8 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
@@ -16,27 +18,27 @@ import java.util.Map;
 import java.util.function.Function;
 
 @Service
-public class    JwtServiceImpl implements JwtService {
+@RequiredArgsConstructor
+public class JwtServiceImpl implements JwtService {
+    //    private static final String SECRET_KEY = "3F4428472B4B6250645367566B5970337336763979244226452948404D635166";
+    @Value("${application.security.jwt.secret-key}")
+    private  String secretKey;
 
-    private static final String SECRET_KEY = "3F4428472B4B6250645367566B5970337336763979244226452948404D635166";
-    @Override
-    public String generateToken(Map<String, Object> extraClaims, UserDetails userDetails) {
-        return Jwts.builder()
-                .setClaims(extraClaims)
-                .setSubject(userDetails.getUsername())
-                .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 24))
-                .signWith(getSignInKey(), SignatureAlgorithm.HS256).compact();
-    }
+    @Value("${application.security.jwt.expiration}")
+    private long jwtTokenExpiration;
+
+    @Value("${application.security.jwt.refresh-token.expiration}")
+    private long refreshTokenExpiration;
 
     @Override
-    public String generateToken(UserDetails userDetails) {
-        return generateToken(new HashMap<>(), userDetails);
+    public String extractUsername(String token) {
+        return extractClaim(token, Claims::getSubject);
     }
 
     @Override
     public Claims extractAllClaims(String token) {
-        return Jwts.parserBuilder()
+        return Jwts
+                .parserBuilder()
                 .setSigningKey(getSignInKey())
                 .build()
                 .parseClaimsJws(token)
@@ -44,14 +46,35 @@ public class    JwtServiceImpl implements JwtService {
     }
 
     @Override
-    public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
-        final Claims claims = extractAllClaims(token);
-        return claimsResolver.apply(claims);
+    public String generateToken(Map<String, Object> extraClaims, UserDetails userDetails) {
+        return buildToken(extraClaims, userDetails, jwtTokenExpiration);
     }
 
     @Override
-    public String extractUsername(String token) {
-        return extractClaim(token, Claims::getSubject);
+    public String generateRefreshToken(UserDetails userDetails) {
+        return buildToken(new HashMap<>(), userDetails, refreshTokenExpiration);
+    }
+
+    private String buildToken(Map<String, Object> extraClaims, UserDetails userDetails, long expiration)
+    {
+        return Jwts
+                .builder()
+                .setClaims(extraClaims)
+                .setSubject(userDetails.getUsername())
+                .setIssuedAt(new Date(System.currentTimeMillis()))
+                .setExpiration(new Date(System.currentTimeMillis() + expiration))
+                .signWith(getSignInKey(), SignatureAlgorithm.HS256)
+                .compact();
+    }
+    @Override
+    public String generateToken(UserDetails userDetails) {
+        return generateToken(new HashMap<>(), userDetails);
+    }
+
+    @Override
+    public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
+        final Claims claims = extractAllClaims(token);
+        return claimsResolver.apply(claims);
     }
 
     @Override
@@ -62,17 +85,18 @@ public class    JwtServiceImpl implements JwtService {
     @Override
     public boolean isValidToken(String token, UserDetails userDetails) {
         String username = extractUsername(token);
-        return username.equals(userDetails.getUsername()) && !isExpiredToken(token);
+        return username.equals(userDetails.getUsername()) && !isTokenExpired(token);
     }
 
     @Override
-    public boolean isExpiredToken(String token) {
+    public boolean isTokenExpired(String token) {
         return extractExpirationDate(token).before(new Date());
     }
 
     @Override
     public Key getSignInKey() {
-        byte[] keyByte = Decoders.BASE64.decode(SECRET_KEY);
+        byte[] keyByte = Decoders.BASE64.decode(secretKey);
         return Keys.hmacShaKeyFor(keyByte);
     }
 }
+

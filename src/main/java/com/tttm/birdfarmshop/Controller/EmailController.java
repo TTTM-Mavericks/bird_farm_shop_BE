@@ -8,6 +8,7 @@ import com.tttm.birdfarmshop.Service.CodeStorageService;
 import com.tttm.birdfarmshop.Service.MailService;
 import com.tttm.birdfarmshop.DTO.MailDTO;
 import com.tttm.birdfarmshop.Utils.Response.AuthenticationResponse;
+import com.tttm.birdfarmshop.Utils.Response.MessageResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,7 +24,7 @@ public class EmailController {
     private final MailService mailService;
     private final CodeStorageService codeStorageService;
     @PostMapping(ConstantAPI.FORGOT_PASSWORD)
-    public ResponseEntity<AuthenticationResponse> ForgotPassword(@RequestBody String json) throws CustomException
+    public ResponseEntity<MessageResponse> ForgotPassword(@RequestBody String json) throws CustomException
     {
         try
         {
@@ -33,7 +34,7 @@ public class EmailController {
         }
         catch (JsonProcessingException ex)
         {
-            return new ResponseEntity<>(new AuthenticationResponse(ex.getMessage()), HttpStatus.NOT_IMPLEMENTED);
+            return new ResponseEntity<>(new MessageResponse(ex.getMessage()), HttpStatus.NOT_IMPLEMENTED);
         }
     }
 }

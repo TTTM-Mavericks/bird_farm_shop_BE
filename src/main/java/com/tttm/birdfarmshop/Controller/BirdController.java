@@ -12,6 +12,7 @@ import com.tttm.birdfarmshop.Utils.Response.MessageResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -59,6 +60,7 @@ public class BirdController {
     }
 
     @PostMapping(ConstantAPI.MATCHING_BIRD_FROM_SAME_OWNER)
+    @PreAuthorize("permitAll()")
     public ResponseEntity<MessageResponse> matchingSameOwner(@RequestBody BirdMatchingRequest bird)
         throws CustomException {
         try {
@@ -68,6 +70,7 @@ public class BirdController {
         }
     }
     @PostMapping(ConstantAPI.MATCHING_BIRD_FROM_DIFFERENT_OWNER)
+    @PreAuthorize("permitAll()")
     public ResponseEntity<MessageResponse> matchingDifferentOwner(@RequestBody BirdRequest bird)
             throws CustomException {
         try {

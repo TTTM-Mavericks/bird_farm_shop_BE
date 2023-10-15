@@ -8,7 +8,7 @@ import com.tttm.birdfarmshop.Utils.Response.MessageResponse;
 import jakarta.servlet.http.HttpSession;
 
 public interface CodeStorageService {
-     AuthenticationResponse getCodeFromSession(MailDTO dto, HttpSession session);
+     MessageResponse getCodeFromSession(MailDTO dto, HttpSession session);
 
      MessageResponse register(User dto, HttpSession session) throws CustomException;
 

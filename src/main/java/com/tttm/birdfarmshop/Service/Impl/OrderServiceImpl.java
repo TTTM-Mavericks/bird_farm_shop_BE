@@ -1,5 +1,6 @@
 package com.tttm.birdfarmshop.Service.Impl;
 
+import com.tttm.birdfarmshop.Enums.AccountStatus;
 import com.tttm.birdfarmshop.Enums.OrderStatus;
 import com.tttm.birdfarmshop.Enums.ProductStatus;
 import com.tttm.birdfarmshop.Enums.VoucherStatus;
@@ -49,7 +50,7 @@ public class OrderServiceImpl implements OrderService {
     public OrderResponse createOrder(OrderRequest orderRequest) {
         Optional<Customer> customer = customerRepository.findById(orderRequest.getCustomerID()); // // Check Product ID is existed or not
         Optional<User> user =  userRepository.findById(orderRequest.getCustomerID());
-        if(customer.isEmpty() || !isValidInformation(orderRequest) || user.get().getAccountStatus() == true) // Check validation fields
+        if(customer.isEmpty() || !isValidInformation(orderRequest) || user.get().getAccountStatus() == AccountStatus.INACTIVE) // Check validation fields
         {
             logger.info("Customer ID, Order Information is Invalid or Your Account is banned");
             return new OrderResponse();
@@ -198,7 +199,7 @@ public class OrderServiceImpl implements OrderService {
         Customer customer = order.get().getCustomer();
         User user = userRepository.findById(customer.getCustomerID()).get();
 
-        if(user.getAccountStatus() == true)
+        if(user.getAccountStatus() == AccountStatus.INACTIVE)
         {
             return new MessageResponse("Fail");
         }
@@ -242,7 +243,7 @@ public class OrderServiceImpl implements OrderService {
         else if(numberCancleOrder + 1 > 3)
         {
             message = "Your account has been Banned";
-            user.setAccountStatus(true);
+            user.setAccountStatus(AccountStatus.INACTIVE);
             userRepository.save(user);
         }
         customer.setNumberCancleOrder(numberCancleOrder + 1);
