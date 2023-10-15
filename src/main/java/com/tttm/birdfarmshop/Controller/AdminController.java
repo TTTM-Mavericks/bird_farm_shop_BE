@@ -9,6 +9,7 @@ import com.tttm.birdfarmshop.Service.AuthenticationService;
 import com.tttm.birdfarmshop.Utils.Request.AuthenticationRequest;
 import com.tttm.birdfarmshop.Utils.Response.AuthenticationResponse;
 import com.tttm.birdfarmshop.Exception.CustomException;
+import com.tttm.birdfarmshop.Utils.Response.UserResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -24,7 +25,7 @@ public class AdminController {
     private final AuthenticationService authenticationService;
     private final AdminService adminService;
     @GetMapping(ConstantAPI.GET_ALL_CUSTOMERS)
-    public ResponseEntity<List<User>> getAllCustomers() throws CustomException {
+    public ResponseEntity<List<UserResponse>> getAllCustomers() throws CustomException {
         try {
             return new ResponseEntity<>(adminService.getAllCustomers(), HttpStatus.OK);
         }
@@ -35,7 +36,7 @@ public class AdminController {
     }
 
     @GetMapping(ConstantAPI.GET_ALL_USERS)
-    public ResponseEntity<List<User>> getAllUsers() throws CustomException {
+    public ResponseEntity<List<UserResponse>> getAllUsers() throws CustomException {
         try {
             return new ResponseEntity<>(adminService.getAllUsers(), HttpStatus.OK);
         }
@@ -46,7 +47,7 @@ public class AdminController {
     }
 
     @PutMapping(ConstantAPI.BAN_USER_ACCOUNT + ConstantParametter.USER_ID)
-    public ResponseEntity<User> BanUserAccount(@PathVariable("UserID") int UserID) throws CustomException {
+    public ResponseEntity<UserResponse> BanUserAccount(@PathVariable("UserID") int UserID) throws CustomException {
         try {
             return new ResponseEntity<>(adminService.BanUserAccount(UserID), HttpStatus.OK);
         }
@@ -57,7 +58,7 @@ public class AdminController {
     }
 
     @PutMapping(ConstantAPI.UNBAN_USER_ACCOUNT + ConstantParametter.USER_ID)
-    public ResponseEntity<User> UnBanUserAccount(@PathVariable("UserID") int UserID) throws CustomException {
+    public ResponseEntity<UserResponse> UnBanUserAccount(@PathVariable("UserID") int UserID) throws CustomException {
         try {
             return new ResponseEntity<>(adminService.UnBanUserAccount(UserID), HttpStatus.OK);
         }

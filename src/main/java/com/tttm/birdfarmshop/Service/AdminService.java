@@ -1,17 +1,18 @@
 package com.tttm.birdfarmshop.Service;
 
 import com.tttm.birdfarmshop.Models.User;
+import com.tttm.birdfarmshop.Utils.Response.UserResponse;
 
 import java.util.List;
 
 public interface AdminService {
     void createAdmin(User user);
 
-    List<User> getAllUsers();
+    List<UserResponse> getAllUsers();
 
-    List<User> getAllCustomers();
+    List<UserResponse> getAllCustomers();
 
-    User BanUserAccount(int UserID);
+    UserResponse BanUserAccount(int UserID);
 
-    User UnBanUserAccount(int UserID);
+    UserResponse UnBanUserAccount(int UserID);
 }

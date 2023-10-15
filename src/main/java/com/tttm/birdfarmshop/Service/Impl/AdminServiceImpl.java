@@ -7,11 +7,13 @@ import com.tttm.birdfarmshop.Models.User;
 import com.tttm.birdfarmshop.Repository.AdminRepository;
 import com.tttm.birdfarmshop.Repository.UserRepository;
 import com.tttm.birdfarmshop.Service.AdminService;
+import com.tttm.birdfarmshop.Utils.Response.UserResponse;
 import lombok.RequiredArgsConstructor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -29,21 +31,32 @@ public class AdminServiceImpl implements AdminService {
     }
 
     @Override
-    public List<User> getAllUsers() {
+    public List<UserResponse> getAllUsers() {
         List<User> list = userRepository.getAllUsers();
+        List<UserResponse> userResponseList = new ArrayList<>();
+        for(User user : list)
+        {
+            userResponseList.add(convertToUserResponse(user));
+        }
         logger.info("Get All Users");
-        return list;
+        return userResponseList;
     }
 
     @Override
-    public List<User> getAllCustomers() {
+    public List<UserResponse> getAllCustomers() {
         List<User> list = userRepository.getAllUsersBasedOnRole(ERole.CUSTOMER.toString());
         logger.info("Get All Customers");
-        return list;
+        List<UserResponse> userResponseList = new ArrayList<>();
+        for(User user : list)
+        {
+            userResponseList.add(convertToUserResponse(user));
+        }
+        logger.info("Get All Users");
+        return userResponseList;
     }
 
     @Override
-    public User BanUserAccount(int UserID) {
+    public UserResponse BanUserAccount(int UserID) {
         User user = userRepository.findById(UserID).get();
         if(user != null)
         {
@@ -51,11 +64,11 @@ public class AdminServiceImpl implements AdminService {
             userRepository.save(user);
             logger.info("Ban User with User ID {} Successfully", UserID);
         }
-        return user;
+        return convertToUserResponse(user);
     }
 
     @Override
-    public User UnBanUserAccount(int UserID) {
+    public UserResponse UnBanUserAccount(int UserID) {
         User user = userRepository.findById(UserID).get();
         if(user != null)
         {
@@ -63,6 +76,23 @@ public class AdminServiceImpl implements AdminService {
             userRepository.save(user);
             logger.info("UnBan User with User ID {} Successfully", UserID);
         }
-        return user;
+        return convertToUserResponse(user);
+    }
+
+    private UserResponse convertToUserResponse(User user)
+    {
+        return UserResponse.builder()
+                .userID(user.getUserID())
+                .firstName(user.getFirstName())
+                .lastName(user.getLastName())
+                .email(user.getEmail())
+                .phone(user.getPhone())
+                .password(user.getPassword())
+                .gender(user.getGender())
+                .dateOfBirth(user.getDateOfBirth())
+                .address(user.getAddress())
+                .accountStatus(user.getAccountStatus())
+                .role(user.getRole())
+                .build();
     }
 }
