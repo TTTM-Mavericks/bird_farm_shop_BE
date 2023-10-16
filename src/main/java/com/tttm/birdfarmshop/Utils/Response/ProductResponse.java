@@ -1,6 +1,8 @@
-package com.tttm.birdfarmshop.DTO;
+package com.tttm.birdfarmshop.Utils.Response;
 
+import com.tttm.birdfarmshop.Enums.ProductStatus;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -9,7 +11,10 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class BirdDTO {
+@Builder
+public class ProductResponse {
+    private String productID;
+
     private String productName;
 
     private Double price;
@@ -22,17 +27,9 @@ public class BirdDTO {
 
     private String feedback;
 
+    private ProductStatus productStatus;
+
     private Integer rating;
 
     private Integer quantity;
-
-    private Integer age;
-
-    private Boolean gender;
-
-    private Boolean fertility;
-
-    private String typeOfBirdID;
-
-    private Integer healthcareProfessionalID;
 }

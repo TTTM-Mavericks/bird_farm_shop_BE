@@ -51,14 +51,16 @@ public class VoucherServiceImpl implements VoucherService {
         int sellerIndex = random.nextInt(sellerList.size());
         Seller seller = sellerList.get(sellerIndex);
 
-        voucherRepository.save(new Voucher(
-                voucherRequest.getVoucherName(),
-                voucherRequest.getStartDate(),
-                voucherRequest.getEndDate(),
-                voucherRequest.getValue(),
-                seller,
-                VoucherStatus.AVAILABLE
-        ));
+        voucherRepository.save(
+                Voucher.builder()
+                .voucherName(voucherRequest.getVoucherName())
+                .startDate(voucherRequest.getStartDate())
+                .endDate(voucherRequest.getEndDate())
+                .value(voucherRequest.getValue())
+                .seller(seller)
+                .voucherStatus(VoucherStatus.AVAILABLE)
+                .build()
+        );
         return new MessageResponse("Success");
     }
 
@@ -142,14 +144,14 @@ public class VoucherServiceImpl implements VoucherService {
 
     private VoucherResponse createVoucherResponse(Voucher voucher)
     {
-        return new VoucherResponse(
-                voucher.getVoucherID(),
-                voucher.getVoucherName(),
-                voucher.getStartDate(),
-                voucher.getEndDate(),
-                voucher.getValue(),
-                voucher.getSeller().getSellerID(),
-                voucher.getVoucherStatus().toString()
-        );
+        return VoucherResponse.builder()
+                .voucherID(voucher.getVoucherID())
+                .voucherName(voucher.getVoucherName())
+                .startDate(voucher.getStartDate())
+                .endDate(voucher.getEndDate())
+                .value(voucher.getValue())
+                .sellerID(voucher.getSeller().getSellerID())
+                .voucherStatus(voucher.getVoucherStatus().toString())
+                .build();
     }
 }

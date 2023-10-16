@@ -10,6 +10,7 @@ import com.tttm.birdfarmshop.Service.OrderService;
 import com.tttm.birdfarmshop.Utils.Request.OrderRequest;
 import com.tttm.birdfarmshop.Utils.Response.MessageResponse;
 import com.tttm.birdfarmshop.Utils.Response.OrderResponse;
+import com.tttm.birdfarmshop.Utils.Response.ProductResponse;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
@@ -32,6 +33,7 @@ public class OrderServiceImpl implements OrderService {
     private final CustomerRepository customerRepository;
     private final ShipperRepository shipperRepository;
     private final VoucherRepository voucherRepository;
+    private final ImageRepository imageRepository;
     private final UserRepository userRepository;
     private final Logger logger = LoggerFactory.getLogger(OrderServiceImpl.class);
 
@@ -109,18 +111,18 @@ public class OrderServiceImpl implements OrderService {
         Shipper shipper = shipperList.get(randomShipperIndex);
 
         orderRepository.save(
-                new Order(
-                        orderRequest.getCustomerPhone(),
-                        orderRequest.getCustomerName(),
-                        orderRequest.getCustomerEmail(),
-                        orderRequest.getCustomerAddress(),
-                        orderRequest.getNote(),
-                        OrderStatus.PENDING,
-                        orderAmount,
-                        orderDate,
-                        customer.get(),
-                        shipper
-                )
+                Order.builder()
+                        .customerPhone(orderRequest.getCustomerPhone())
+                        .customerName(orderRequest.getCustomerName())
+                        .customerEmail(orderRequest.getCustomerEmail())
+                        .customerAddress(orderRequest.getCustomerAddress())
+                        .note(orderRequest.getNote())
+                        .status(OrderStatus.PENDING)
+                        .amount(orderAmount)
+                        .orderDate(orderDate)
+                        .customer(customer.get())
+                        .shipper(shipper)
+                        .build()
         );
 
         // Get the newest Order then Add Order to OrderDetail
@@ -173,18 +175,43 @@ public class OrderServiceImpl implements OrderService {
 
     private OrderResponse createOrderResponse(Order newestOrder, List<Product> productList)
     {
-        return new OrderResponse(
-                newestOrder.getOrderID(),
-                newestOrder.getCustomer().getCustomerID(),
-                newestOrder.getCustomerPhone(),
-                newestOrder.getCustomerName(),
-                newestOrder.getCustomerEmail(),
-                newestOrder.getCustomerAddress(),
-                newestOrder.getNote(),
-                newestOrder.getAmount(),
-                newestOrder.getOrderDate(),
-                productList
-        );
+        return OrderResponse.builder()
+                .orderID(newestOrder.getOrderID())
+                .customerID(newestOrder.getCustomer().getCustomerID())
+                .customerPhone(newestOrder.getCustomerPhone())
+                .customerName(newestOrder.getCustomerName())
+                .customerEmail(newestOrder.getCustomerEmail())
+                .customerAddress(newestOrder.getCustomerAddress())
+                .note(newestOrder.getNote())
+                .orderAmount(newestOrder.getAmount())
+                .orderDate(newestOrder.getOrderDate())
+                .productList(
+                        productList.stream()
+                            .map(this::mapperedToProductResponse)
+                            .collect(Collectors.toList())
+                )
+                .build();
+    }
+
+    private ProductResponse mapperedToProductResponse(Product product)
+    {
+        return ProductResponse.builder()
+                .productID(product.getProductID())
+                .productName(product.getProductName())
+                .price(product.getPrice())
+                .description(product.getDescription())
+                .typeOfProduct(product.getTypeOfProduct())
+                .images(
+                        imageRepository.findImageByProductID(product.getProductID())
+                                .stream()
+                                .map(Image::getImageUrl)
+                                .collect(Collectors.toList())
+                )
+                .feedback(product.getFeedback())
+                .productStatus(product.getProductStatus())
+                .rating(product.getRating())
+                .quantity(product.getQuantity())
+                .build();
     }
 
     @Transactional

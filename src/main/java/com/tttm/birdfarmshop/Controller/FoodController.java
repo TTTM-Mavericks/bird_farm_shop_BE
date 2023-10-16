@@ -4,13 +4,12 @@ import com.tttm.birdfarmshop.Constant.ConstantAPI;
 import com.tttm.birdfarmshop.Constant.ConstantParametter;
 import com.tttm.birdfarmshop.DTO.FoodDTO;
 import com.tttm.birdfarmshop.Exception.CustomException;
-import com.tttm.birdfarmshop.Models.Product;
 import com.tttm.birdfarmshop.Service.FoodService;
 import com.tttm.birdfarmshop.Utils.Response.MessageResponse;
+import com.tttm.birdfarmshop.Utils.Response.ProductResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -42,7 +41,7 @@ public class FoodController {
         }
     }
     @GetMapping(ConstantAPI.GET_FOOD_BY_ID + ConstantParametter.FOOD_ID)
-    public ResponseEntity<Product> getFoodByID(@PathVariable ("FoodID") String FoodID) throws CustomException {
+    public ResponseEntity<ProductResponse> getFoodByID(@PathVariable ("FoodID") String FoodID) throws CustomException {
         try {
             return new ResponseEntity<>(foodService.findFoodByFoodID(FoodID), HttpStatus.OK);
         }
@@ -53,7 +52,7 @@ public class FoodController {
     }
 
     @GetMapping(ConstantAPI.GET_ALL_FOOD)
-    public ResponseEntity<List<Product>> getAllFood() throws CustomException {
+    public ResponseEntity<List<ProductResponse>> getAllFood() throws CustomException {
         try {
             return new ResponseEntity<>(foodService.findAllFood(), HttpStatus.OK);
         }

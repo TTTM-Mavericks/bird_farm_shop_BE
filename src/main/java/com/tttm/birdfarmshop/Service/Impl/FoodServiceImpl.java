@@ -3,22 +3,28 @@ package com.tttm.birdfarmshop.Service.Impl;
 import com.tttm.birdfarmshop.DTO.FoodDTO;
 import com.tttm.birdfarmshop.Enums.ProductStatus;
 import com.tttm.birdfarmshop.Models.Food;
+import com.tttm.birdfarmshop.Models.Image;
 import com.tttm.birdfarmshop.Models.Product;
 import com.tttm.birdfarmshop.Repository.FoodRepository;
+import com.tttm.birdfarmshop.Repository.ImageRepository;
 import com.tttm.birdfarmshop.Repository.ProductRepository;
 import com.tttm.birdfarmshop.Service.FoodService;
 import com.tttm.birdfarmshop.Utils.Response.MessageResponse;
+import com.tttm.birdfarmshop.Utils.Response.ProductResponse;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class FoodServiceImpl implements FoodService {
     private final FoodRepository foodRepository;
     private final ProductRepository productRepository;
+    private final ImageRepository imageRepository;
     private boolean isValidFood(FoodDTO dto)
     {
         return !dto.getProductName().isBlank() && !dto.getProductName().isEmpty() && dto.getPrice() >= 0
@@ -32,46 +38,69 @@ public class FoodServiceImpl implements FoodService {
 
         if(isValidFood(dto))
         {
-            productRepository.save(new Product(
-                    FoodID,
-                    dto.getProductName(),
-                    dto.getPrice(),
-                    dto.getDescription(),
-                    dto.getTypeOfProduct(),
-                    dto.getImages(),
-                    dto.getFeedback(),
-                    dto.getRating(),
-                    ProductStatus.AVAILABLE,
-                    dto.getQuantity()
-            ));
-
+            Product product = productRepository.save(Product.builder()
+                    .productID(FoodID)
+                    .productName(dto.getProductName())
+                    .price(dto.getPrice())
+                    .description(dto.getDescription())
+                    .typeOfProduct(dto.getTypeOfProduct())
+                    .feedback(dto.getFeedback())
+                    .rating(dto.getRating())
+                    .productStatus(ProductStatus.AVAILABLE)
+                    .quantity(dto.getQuantity())
+                    .build()
+            );
             foodRepository.save(new Food(FoodID));
+
+            List<String> listImages = dto.getImages();
+            listImages.forEach(
+                    imageUrl -> imageRepository.save(
+                            Image.builder()
+                                    .imageUrl(imageUrl)
+                                    .imageProduct(product)
+                                    .build())
+            );
+
             return new MessageResponse("Success");
         }
         return new MessageResponse("Fail");
     }
 
+    @Transactional
     @Override
-    public MessageResponse UpdateFood(String productID, FoodDTO dto) {
+    public MessageResponse UpdateFood(String foodID, FoodDTO dto) {
         try {
-            Optional<Product> productOptional = productRepository.findById(productID);
+            Optional<Product> productOptional = productRepository.findById(foodID);
             if(productOptional.isEmpty() || !isValidFood(dto))
             {
                 return new MessageResponse("Fail");
             }
             return new MessageResponse(
                     Optional
-                            .ofNullable(productRepository.findById(productID).get())
+                            .ofNullable(productRepository.findById(foodID).get())
                             .map(food ->{
                                 food.setProductName(dto.getProductName());
                                 food.setPrice(dto.getPrice());
                                 food.setDescription(dto.getDescription());
                                 food.setTypeOfProduct(dto.getTypeOfProduct());
-                                food.setImages(dto.getImages());
                                 food.setFeedback(dto.getFeedback());
                                 food.setRating(dto.getRating());
                                 food.setQuantity(dto.getQuantity());
                                 productRepository.save(food);
+
+                                List<String> listImages = dto.getImages();
+                                if(listImages.size() != 0)
+                                {
+                                    imageRepository.deleteImageByproductID(foodID);
+                                    listImages.forEach(
+                                            imageUrl -> imageRepository.save(
+                                                    Image.builder()
+                                                            .imageUrl(imageUrl)
+                                                            .imageProduct(food)
+                                                            .build())
+                                    );
+                                }
+
                                 return "Success";
                             })
                             .orElse("Fail")
@@ -83,25 +112,49 @@ public class FoodServiceImpl implements FoodService {
         }
     }
 
+    private ProductResponse mapperedToProductResponse(Product product)
+    {
+        return ProductResponse.builder()
+                .productID(product.getProductID())
+                .productName(product.getProductName())
+                .price(product.getPrice())
+                .description(product.getDescription())
+                .typeOfProduct(product.getTypeOfProduct())
+                .images(
+                        imageRepository.findImageByProductID(product.getProductID())
+                                .stream()
+                                .map(Image::getImageUrl)
+                                .collect(Collectors.toList())
+                )
+                .feedback(product.getFeedback())
+                .productStatus(product.getProductStatus())
+                .rating(product.getRating())
+                .quantity(product.getQuantity())
+                .build();
+    }
+
     @Override
-    public Product findFoodByFoodID(String foodID) {
+    public ProductResponse findFoodByFoodID(String foodID) {
         try
         {
             Optional<Product> foodOptional = productRepository.findById(foodID);
             if(foodOptional.isPresent())
             {
-                return foodOptional.get();
+                return mapperedToProductResponse(foodOptional.get());
             }
-            else return new Product();
+            else return new ProductResponse();
         }
         catch (Exception e)
         {
-            return new Product();
+            return new ProductResponse();
         }
     }
 
     @Override
-    public List<Product> findAllFood() {
-        return productRepository.findAllFood();
+    public List<ProductResponse> findAllFood() {
+        return productRepository.findAllFood()
+                .stream()
+                .map(this::mapperedToProductResponse)
+                .collect(Collectors.toList());
     }
 }
