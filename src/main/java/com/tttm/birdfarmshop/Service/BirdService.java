@@ -15,8 +15,7 @@ public interface BirdService {
 
     BirdResponse findBirdByBirdID(String BirdID);
     List<BirdResponse> findAllBird();
-//    List<Product> findAllBird();
     MessageResponse matchingBird(BirdRequest firstBird, BirdRequest secondBird);
-    MessageResponse matchingBirdDifferentOwner (BirdRequest birdRequest);
-
+    List<BirdResponse> matchingBirdDifferentOwner (BirdRequest birdRequest);
+    List<BirdResponse> matchingBirdInShop (String id);
 }
