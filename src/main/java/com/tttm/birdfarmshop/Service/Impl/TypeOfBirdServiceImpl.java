@@ -36,7 +36,13 @@ public class TypeOfBirdServiceImpl implements TypeOfBirdService {
         String typeID = "TB00" + (size + 1);
 
         if(isValidTypeOfBird(dto)) {
-            typeOfBirdRepository.save(new TypeOfBird(typeID, dto.getTypeName(), 0));
+            typeOfBirdRepository.save(
+                    TypeOfBird
+                            .builder()
+                            .typeID(typeID)
+                            .typeName(dto.getTypeName())
+                            .quantity(0)
+                            .build());
             return new MessageResponse("Success");
         }
         return new MessageResponse("Fail");
@@ -98,10 +104,11 @@ public class TypeOfBirdServiceImpl implements TypeOfBirdService {
 
     private TypeOfBirdResponse mapperedToTypeOfBirdResponse(TypeOfBird typeOfBird)
     {
-        return new TypeOfBirdResponse(
-                typeOfBird.getTypeID(),
-                typeOfBird.getTypeName(),
-                typeOfBird.getQuantity()
-        );
+        return TypeOfBirdResponse
+                .builder()
+                .typeID(typeOfBird.getTypeID())
+                .typeName(typeOfBird.getTypeName())
+                .quantity(typeOfBird.getQuantity())
+                .build();
     }
 }

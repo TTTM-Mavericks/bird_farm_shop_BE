@@ -3,19 +3,14 @@ package com.tttm.birdfarmshop.Service.Impl;
 import com.tttm.birdfarmshop.DTO.BirdDTO;
 import com.tttm.birdfarmshop.Enums.BirdMatchingStatus;
 import com.tttm.birdfarmshop.Enums.ProductStatus;
-import com.tttm.birdfarmshop.Models.Bird;
-import com.tttm.birdfarmshop.Models.HealthcareProfessional;
-import com.tttm.birdfarmshop.Models.Product;
-import com.tttm.birdfarmshop.Models.TypeOfBird;
-import com.tttm.birdfarmshop.Repository.BirdRepository;
-import com.tttm.birdfarmshop.Repository.HealthcareProfessionalRepository;
-import com.tttm.birdfarmshop.Repository.ProductRepository;
-import com.tttm.birdfarmshop.Repository.TypeOfBirdRepository;
+import com.tttm.birdfarmshop.Models.*;
+import com.tttm.birdfarmshop.Repository.*;
 import com.tttm.birdfarmshop.Service.BirdService;
 import com.tttm.birdfarmshop.Utils.Request.BirdRequest;
 import com.tttm.birdfarmshop.Utils.Response.BirdMatchingResponse;
 import com.tttm.birdfarmshop.Utils.Response.BirdResponse;
 import com.tttm.birdfarmshop.Utils.Response.MessageResponse;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,6 +21,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -34,6 +30,7 @@ public class BirdServiceImpl implements BirdService {
     private final ProductRepository productRepository;
     private final HealthcareProfessionalRepository healthcareProfessionalRepository;
     private final TypeOfBirdRepository typeOfBirdRepository;
+    private final ImageRepository imageRepository;
     private final Logger logger = LoggerFactory.getLogger(BirdServiceImpl.class);
     private boolean isValidFood(BirdDTO dto)
     {
@@ -57,28 +54,40 @@ public class BirdServiceImpl implements BirdService {
         TypeOfBird typeOfBird = typeOfBirdOptional.get();
         HealthcareProfessional healthcareProfessional = healthcareProfessionalOptional.get();
 
-         productRepository.save(new Product(
-                BirdID,
-                dto.getProductName(),
-                dto.getPrice(),
-                dto.getDescription(),
-                dto.getTypeOfProduct(),
-                dto.getImages(),
-                dto.getFeedback(),
-                dto.getRating(),
-                ProductStatus.AVAILABLE,
-                dto.getQuantity()
-         ));
+         Product product = productRepository.save(
+                 Product.builder()
+                         .productID(BirdID)
+                         .productName(dto.getProductName())
+                         .price(dto.getPrice())
+                         .description(dto.getDescription())
+                         .typeOfProduct(dto.getTypeOfProduct())
+                         .feedback(dto.getFeedback())
+                         .rating(dto.getRating())
+                         .productStatus(ProductStatus.AVAILABLE)
+                         .quantity(dto.getQuantity())
+                         .build()
+         );
 
-        birdRepository.save(new Bird(
-                BirdID,
-                dto.getAge(),
-                dto.getGender(),
-                false,
-                dto.getFertility(),
-                typeOfBird,
-                healthcareProfessional
-        ));
+        List<String> listImages = dto.getImages();
+        listImages.forEach(
+                imageUrl -> imageRepository.save(
+                        Image.builder()
+                        .imageUrl(imageUrl)
+                        .imageProduct(product)
+                        .build())
+        );
+
+        birdRepository.save(
+                Bird.builder()
+                        .birdID(BirdID)
+                        .age(dto.getAge())
+                        .gender(dto.getGender())
+                        .status(false)
+                        .fertility(dto.getFertility())
+                        .typeOfBird(typeOfBird)
+                        .healthcareProfessional(healthcareProfessional)
+                        .build()
+        );
 
         // Update Type Of Bird Quantity
         int quantity = typeOfBird.getQuantity();
@@ -88,10 +97,11 @@ public class BirdServiceImpl implements BirdService {
         return new MessageResponse("Success");
     }
 
+    @Transactional
     @Override
-    public MessageResponse UpdateBird(String BirdID, BirdDTO dto) {
+    public MessageResponse UpdateBird(String birdID, BirdDTO dto) {
         try {
-            Optional<Product> productOptional = productRepository.findById(BirdID);
+            Optional<Product> productOptional = productRepository.findById(birdID);
             if (productOptional.isEmpty()) {
                 return new MessageResponse("Fail");
             }
@@ -113,14 +123,27 @@ public class BirdServiceImpl implements BirdService {
                 product.setPrice(dto.getPrice());
                 product.setDescription(dto.getDescription());
                 product.setTypeOfProduct(dto.getTypeOfProduct());
-                product.setImages(dto.getImages());
                 product.setFeedback(dto.getFeedback());
                 product.setRating(dto.getRating());
                 product.setQuantity(dto.getQuantity());
                 productRepository.save(product);
 
+                List<String> listImages = dto.getImages();
+                if(listImages.size() != 0)
+                {
+                    imageRepository.deleteImageByproductID(birdID);
+                    listImages.forEach(
+                            imageUrl -> imageRepository.save(
+                                    Image.builder()
+                                            .imageUrl(imageUrl)
+                                            .imageProduct(product)
+                                            .build())
+                    );
+                }
+
+
                 // Update Bird Info
-                Bird bird = birdRepository.findById(BirdID).orElse(null);
+                Bird bird = birdRepository.findById(birdID).orElse(null);
                 if (bird == null) {
                     return new MessageResponse("Fail");
                 }
@@ -188,22 +211,28 @@ public class BirdServiceImpl implements BirdService {
 
     private BirdResponse mapperedToBirdRepsonse(Product product, Bird bird)
     {
-        return new BirdResponse(
-                product.getProductID(),
-                product.getProductName(),
-                product.getPrice(),
-                product.getDescription(),
-                product.getTypeOfProduct(),
-                product.getImages(),
-                product.getFeedback(),
-                product.getRating(),
-                product.getQuantity(),
-                bird.getAge(),
-                bird.getGender(),
-                bird.getFertility(),
-                bird.getTypeOfBird().getTypeID(),
-                bird.getHealthcareProfessional().getHealthcareID()
-        );
+        return BirdResponse.builder()
+            .productID(product.getProductID())
+            .productName(product.getProductName())
+            .price(product.getPrice())
+            .description(product.getDescription())
+            .typeOfProduct(product.getTypeOfProduct())
+            .images(
+                    imageRepository.findImageByProductID(product.getProductID())
+                            .stream()
+                            .map(Image::getImageUrl)
+                            .collect(Collectors.toList())
+            )
+            .feedback(product.getFeedback())
+            .rating(product.getRating())
+            .quantity(product.getQuantity())
+            .age(bird.getAge())
+            .gender(bird.getGender())
+            .fertility(bird.getFertility())
+            .typeOfBirdID(bird.getTypeOfBird().getTypeID())
+            .healthcareProfessionalID(bird.getHealthcareProfessional().getHealthcareID())
+            .build();
+
     }
 
     private boolean checkBirdInfo(BirdRequest bird){
@@ -300,14 +329,22 @@ public class BirdServiceImpl implements BirdService {
             if(birdRequestList == null){
                 birdRequestList = new ArrayList<>();
             }
-            birdRequestList.add(new BirdRequest(bird.getProduct().getProductName(),
-                    bird.getTypeOfBird().toString(),
-                    bird.getProduct().getDescription(),
-                    bird.getAge(),
-                    bird.getGender(),
-                    bird.getBreedingTimes(),
-                    bird.getColor(),
-                    bird.getProduct().getImages()));
+            birdRequestList.add(
+                    BirdRequest.builder()
+                    .birdName(bird.getProduct().getProductName())
+                    .typeOfBird(bird.getTypeOfBird().toString())
+                    .description(bird.getProduct().getDescription())
+                    .age(bird.getAge())
+                    .gender(bird.getGender())
+                    .breedingTimes(bird.getBreedingTimes())
+                    .color(bird.getColor())
+                    .images(
+                            imageRepository.findImageByProductID(bird.getBirdID())
+                                    .stream()
+                                    .map(Image::getImageUrl)
+                                    .collect(Collectors.toList())
+                    )
+                    .build());
         }
         return birdRequestList;
     }

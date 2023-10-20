@@ -1,12 +1,12 @@
 package com.tttm.birdfarmshop.Utils.Request;
 
 import com.tttm.birdfarmshop.Enums.BirdColor;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.RequiredArgsConstructor;
+import lombok.*;
+
+import java.util.List;
 
 @Data
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
 public class BirdRequest {
@@ -17,7 +17,7 @@ public class BirdRequest {
     private Boolean gender;
     private Integer breedingTimes;
     private BirdColor color;
-    private String images;
+    private List<String> images;
 
     @Override
     public String toString() {

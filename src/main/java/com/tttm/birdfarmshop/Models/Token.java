@@ -17,13 +17,16 @@ public class Token {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
+    @Column(name = "token", nullable = false, unique = false)
     private String token;
 
     @Enumerated(EnumType.STRING)
     private TokenType tokenType;
 
+    @Column(name = "expired", nullable = false, unique = false)
     private boolean expired;
 
+    @Column(name = "revoked", nullable = false, unique = false)
     private boolean revoked;
 
     @ManyToOne

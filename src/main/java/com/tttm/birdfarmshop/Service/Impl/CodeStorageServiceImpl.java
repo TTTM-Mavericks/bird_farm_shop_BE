@@ -165,18 +165,18 @@ public class CodeStorageServiceImpl implements CodeStorageService {
             logger.warn(ConstantMessage.PHONE_IS_EXIST);
             throw new CustomException(ConstantMessage.PHONE_IS_EXIST.toString());
         }
-        User user = new User(
-                dto.getFirstName(),
-                dto.getLastName(),
-                dto.getEmail(),
-                dto.getPhone(),
-                passwordEncoder.encode(dto.getPassword()),
-                dto.getGender(),
-                dto.getDateOfBirth(),
-                dto.getAddress(),
-                AccountStatus.ACTIVE,
-                role
-        );
+        User user = User.builder()
+                .firstName(dto.getFirstName())
+                .lastName(dto.getLastName())
+                .email(dto.getEmail())
+                .phone(dto.getPhone())
+                .password(passwordEncoder.encode(dto.getPassword()))
+                .gender(dto.getGender())
+                .dateOfBirth(dto.getDateOfBirth())
+                .address(dto.getAddress())
+                .accountStatus(AccountStatus.ACTIVE)
+                .role(role)
+                .build();
         var jwtToken = jwtService.generateToken(user);
 
         String code = mailService.SendCode(dto.getEmail());

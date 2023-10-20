@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 
 import java.util.Date;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -12,6 +13,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
+@Builder
 @Table(name = "[Voucher]")
 public class Voucher {
   @Id
@@ -19,7 +21,7 @@ public class Voucher {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Integer voucherID;
 
-  @Column(name = "voucherName", nullable = false, unique = true, length = 100)
+  @Column(name = "voucherName", nullable = false, unique = true, length = 100, columnDefinition = "NVARCHAR(255)")
   private String voucherName;
 
   @Column(name = "startDate", nullable = false, unique = false)

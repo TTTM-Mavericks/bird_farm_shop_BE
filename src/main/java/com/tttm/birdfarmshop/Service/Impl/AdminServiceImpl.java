@@ -15,6 +15,8 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -32,51 +34,46 @@ public class AdminServiceImpl implements AdminService {
 
     @Override
     public List<UserResponse> getAllUsers() {
-        List<User> list = userRepository.getAllUsers();
-        List<UserResponse> userResponseList = new ArrayList<>();
-        for(User user : list)
-        {
-            userResponseList.add(convertToUserResponse(user));
-        }
         logger.info("Get All Users");
-        return userResponseList;
+        List<UserResponse> list = userRepository.getAllUsers()
+                .stream()
+                .map(this::convertToUserResponse)
+                .collect(Collectors.toList());
+        return list;
     }
 
     @Override
     public List<UserResponse> getAllCustomers() {
-        List<User> list = userRepository.getAllUsersBasedOnRole(ERole.CUSTOMER.toString());
         logger.info("Get All Customers");
-        List<UserResponse> userResponseList = new ArrayList<>();
-        for(User user : list)
-        {
-            userResponseList.add(convertToUserResponse(user));
-        }
-        logger.info("Get All Users");
-        return userResponseList;
+        List<UserResponse> list = userRepository.getAllUsersBasedOnRole(ERole.CUSTOMER.toString())
+                .stream()
+                .map(this::convertToUserResponse)
+                .collect(Collectors.toList());
+        return list;
     }
 
     @Override
     public UserResponse BanUserAccount(int UserID) {
-        User user = userRepository.findById(UserID).get();
-        if(user != null)
+        Optional<User> user = userRepository.findById(UserID);
+        if(user.get() != null)
         {
-            user.setAccountStatus(AccountStatus.INACTIVE);
-            userRepository.save(user);
+            user.get().setAccountStatus(AccountStatus.INACTIVE);
+            userRepository.save(user.get());
             logger.info("Ban User with User ID {} Successfully", UserID);
         }
-        return convertToUserResponse(user);
+        return convertToUserResponse(user.get());
     }
 
     @Override
     public UserResponse UnBanUserAccount(int UserID) {
-        User user = userRepository.findById(UserID).get();
-        if(user != null)
+        Optional<User> user = userRepository.findById(UserID);
+        if(user.get() != null)
         {
-            user.setAccountStatus(AccountStatus.ACTIVE);
-            userRepository.save(user);
+            user.get().setAccountStatus(AccountStatus.ACTIVE);
+            userRepository.save(user.get());
             logger.info("UnBan User with User ID {} Successfully", UserID);
         }
-        return convertToUserResponse(user);
+        return convertToUserResponse(user.get());
     }
 
     private UserResponse convertToUserResponse(User user)

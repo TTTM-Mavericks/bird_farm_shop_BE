@@ -2,6 +2,7 @@ package com.tttm.birdfarmshop.Models;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -11,14 +12,15 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
+@Builder
 @Table(name = "[TypeOfBird]")
 public class TypeOfBird {
 
   @Id
-  @Column(name = "typeID", nullable = false, unique = true)
+  @Column(name = "typeID", nullable = false, unique = true, columnDefinition = "NVARCHAR(255)")
   private String typeID;
 
-  @Column(name = "typeName", nullable = false, unique = false, length = 100)
+  @Column(name = "typeName", nullable = false, unique = false, length = 100, columnDefinition = "NVARCHAR(255)")
   private String typeName;
 
   @Column(name = "quantity", unique = false, nullable = false)

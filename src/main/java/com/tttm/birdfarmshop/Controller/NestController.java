@@ -2,17 +2,15 @@ package com.tttm.birdfarmshop.Controller;
 
 import com.tttm.birdfarmshop.Constant.ConstantAPI;
 import com.tttm.birdfarmshop.Constant.ConstantParametter;
-import com.tttm.birdfarmshop.DTO.FoodDTO;
 import com.tttm.birdfarmshop.DTO.NestDTO;
 import com.tttm.birdfarmshop.Exception.CustomException;
-import com.tttm.birdfarmshop.Models.Product;
-import com.tttm.birdfarmshop.Service.FoodService;
 import com.tttm.birdfarmshop.Service.NestService;
 import com.tttm.birdfarmshop.Utils.Response.MessageResponse;
+
+import com.tttm.birdfarmshop.Utils.Response.ProductResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -44,7 +42,7 @@ public class NestController {
         }
     }
     @GetMapping(ConstantAPI.GET_NEST_BY_ID + ConstantParametter.NEST_ID)
-    public ResponseEntity<Product> getNestByID(@PathVariable ("NestID") String NestID) throws CustomException {
+    public ResponseEntity<ProductResponse> getNestByID(@PathVariable ("NestID") String NestID) throws CustomException {
         try {
             return new ResponseEntity<>(nestService.findNestByNestID(NestID), HttpStatus.OK);
         }
@@ -55,7 +53,7 @@ public class NestController {
     }
 
     @GetMapping(ConstantAPI.GET_ALL_NEST)
-    public ResponseEntity<List<Product>> getAllNest() throws CustomException {
+    public ResponseEntity<List<ProductResponse>> getAllNest() throws CustomException {
         try {
             return new ResponseEntity<>(nestService.findAllNest(), HttpStatus.OK);
         }

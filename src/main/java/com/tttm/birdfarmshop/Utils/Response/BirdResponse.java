@@ -1,12 +1,16 @@
 package com.tttm.birdfarmshop.Utils.Response;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.util.List;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 public class BirdResponse {
     private String productID;
 
@@ -18,7 +22,7 @@ public class BirdResponse {
 
     private String typeOfProduct;
 
-    private String images;
+    private List<String> images;
 
     private String feedback;
 

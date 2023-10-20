@@ -3,6 +3,7 @@ package com.tttm.birdfarmshop.Models;
 import com.tttm.birdfarmshop.Enums.BirdColor;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -10,10 +11,11 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
+@Builder
 @Table(name = "[Bird]")
 public class Bird {
   @Id
-  @Column(name = "birdID", nullable = false, unique = true)
+  @Column(name = "birdID", nullable = false, unique = true, columnDefinition = "NVARCHAR(255)")
   private String birdID;
 
   @Column(name = "age", nullable = true, unique = false)

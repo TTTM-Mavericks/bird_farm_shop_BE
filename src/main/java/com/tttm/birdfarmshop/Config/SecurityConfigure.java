@@ -55,16 +55,7 @@ public class SecurityConfigure {
 
                 .authorizeHttpRequests((authorize) ->
                         authorize
-                                .requestMatchers(
-                                        antMatcher("/typeOfBird/**"),
-                                        antMatcher("/food/**"),
-                                        antMatcher("/nest/**"),
-                                        antMatcher("/bird/**"),
-                                        antMatcher("/voucher/**"),
-                                        antMatcher("/order/**"),
-                                        antMatcher("/email/**"),
-                                        antMatcher("/admin/**")
-                                )
+                                .anyRequest()
                                 .permitAll()
                 )
 

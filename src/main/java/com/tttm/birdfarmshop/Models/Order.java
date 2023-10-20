@@ -3,12 +3,14 @@ package com.tttm.birdfarmshop.Models;
 import com.tttm.birdfarmshop.Enums.OrderStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.Date;
 
 @Data
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity()
@@ -19,19 +21,19 @@ public class Order {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Integer orderID;
 
-  @Column(name = "customerPhone", nullable = false, unique = false)
+  @Column(name = "customerPhone", nullable = false, unique = false, columnDefinition = "NVARCHAR(255)")
   private String customerPhone;
 
-  @Column(name = "customerName", unique = false, nullable = false)
+  @Column(name = "customerName", unique = false, nullable = false, columnDefinition = "NVARCHAR(255)")
   private String customerName;
 
-  @Column(name = "customerEmail", unique = false, nullable = false)
+  @Column(name = "customerEmail", unique = false, nullable = false, columnDefinition = "NVARCHAR(255)")
   private String customerEmail;
 
-  @Column(name = "customerAddress", nullable = false, unique = false)
+  @Column(name = "customerAddress", nullable = false, unique = false, columnDefinition = "NVARCHAR(255)")
   private String customerAddress;
 
-  @Column(name = "note", unique = false, nullable = true, length = 500)
+  @Column(name = "note", unique = false, nullable = true, length = 500, columnDefinition = "NVARCHAR(255)")
   private String note;
 
   @Column(name = "status", nullable = false, unique = false)

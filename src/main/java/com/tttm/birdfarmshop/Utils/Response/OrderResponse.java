@@ -2,6 +2,7 @@ package com.tttm.birdfarmshop.Utils.Response;
 
 import com.tttm.birdfarmshop.Models.Product;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -11,6 +12,7 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 public class OrderResponse {
     private Integer orderID;
 
@@ -30,5 +32,5 @@ public class OrderResponse {
 
     private Date orderDate;
 
-    private List<Product> productList;
+    private List<ProductResponse> productList;
 }
