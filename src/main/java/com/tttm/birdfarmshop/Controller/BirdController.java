@@ -69,10 +69,21 @@ public class BirdController {
         }
     }
     @PostMapping(ConstantAPI.MATCHING_BIRD_FROM_DIFFERENT_OWNER)
-    public ResponseEntity<MessageResponse> matchingDifferentOwner(@RequestBody BirdRequest bird)
+    public ResponseEntity<List<BirdResponse>> matchingDifferentOwner(@RequestBody BirdRequest bird)
             throws CustomException {
         try {
-            return new ResponseEntity<>(birdService.matchingBirdDifferentOwner(bird), HttpStatus.OK);
+            return ResponseEntity.status(HttpStatus.OK).body(birdService.matchingBirdDifferentOwner(bird));
+//            return new ResponseEntity<>(birdService.matchingBirdDifferentOwner(bird), HttpStatus.OK);
+        } catch (Exception ex) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @GetMapping(ConstantAPI.MATCHING_BIRD_IN_SHOP + ConstantParametter.BIRD_ID)
+    public ResponseEntity<List<BirdResponse>> matchingBirdInShop(@PathVariable("BirdID") String BirdID)
+            throws CustomException {
+        try {
+            return new ResponseEntity<>(birdService.matchingBirdInShop(BirdID), HttpStatus.OK);
         } catch (Exception ex) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
