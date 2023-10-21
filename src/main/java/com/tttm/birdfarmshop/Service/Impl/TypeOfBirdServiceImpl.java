@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -110,5 +111,14 @@ public class TypeOfBirdServiceImpl implements TypeOfBirdService {
                 .typeName(typeOfBird.getTypeName())
                 .quantity(typeOfBird.getQuantity())
                 .build();
+    }
+
+    @Override
+    public List<TypeOfBirdResponse> findTypeOfBirdByName(String name) {
+        return typeOfBirdRepository.findAll()
+                .stream()
+                .filter(typeOfBird -> typeOfBird.getTypeName().contains(name))
+                .map(this::mapperedToTypeOfBirdResponse)
+                .collect(Collectors.toList());
     }
 }

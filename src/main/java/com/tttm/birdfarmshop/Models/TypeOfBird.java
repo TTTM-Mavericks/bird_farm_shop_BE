@@ -17,7 +17,7 @@ import java.util.List;
 public class TypeOfBird {
 
   @Id
-  @Column(name = "typeID", nullable = false, unique = true, columnDefinition = "NVARCHAR(255)")
+  @Column(name = "typeID", nullable = false, unique = true,  columnDefinition = "NVARCHAR(255)")
   private String typeID;
 
   @Column(name = "typeName", nullable = false, unique = false, length = 100, columnDefinition = "NVARCHAR(255)")

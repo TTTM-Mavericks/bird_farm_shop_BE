@@ -7,6 +7,7 @@ import com.tttm.birdfarmshop.Exception.CustomException;
 import com.tttm.birdfarmshop.Service.BirdService;
 import com.tttm.birdfarmshop.Utils.Request.BirdMatchingRequest;
 import com.tttm.birdfarmshop.Utils.Request.BirdRequest;
+import com.tttm.birdfarmshop.Utils.Request.FilterProduct;
 import com.tttm.birdfarmshop.Utils.Response.BirdResponse;
 import com.tttm.birdfarmshop.Utils.Response.MessageResponse;
 import lombok.RequiredArgsConstructor;
@@ -69,23 +70,67 @@ public class BirdController {
         }
     }
     @PostMapping(ConstantAPI.MATCHING_BIRD_FROM_DIFFERENT_OWNER)
-    public ResponseEntity<List<BirdResponse>> matchingDifferentOwner(@RequestBody BirdRequest bird)
+    public ResponseEntity<MessageResponse> matchingDifferentOwner(@RequestBody BirdRequest bird)
             throws CustomException {
         try {
-            return ResponseEntity.status(HttpStatus.OK).body(birdService.matchingBirdDifferentOwner(bird));
-//            return new ResponseEntity<>(birdService.matchingBirdDifferentOwner(bird), HttpStatus.OK);
+            return new ResponseEntity<>(birdService.matchingBirdDifferentOwner(bird), HttpStatus.OK);
         } catch (Exception ex) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
     }
 
-    @GetMapping(ConstantAPI.MATCHING_BIRD_IN_SHOP + ConstantParametter.BIRD_ID)
-    public ResponseEntity<List<BirdResponse>> matchingBirdInShop(@PathVariable("BirdID") String BirdID)
-            throws CustomException {
+    @PostMapping(ConstantAPI.GET_BIRD_BY_NAME + ConstantParametter.BIRD_NAME)
+    public ResponseEntity<List<BirdResponse>> findBirdByName(@PathVariable("BirdName") String BirdName) throws CustomException {
         try {
-            return new ResponseEntity<>(birdService.matchingBirdInShop(BirdID), HttpStatus.OK);
+            return new ResponseEntity<>(birdService.findBirdByName(BirdName), HttpStatus.OK);
         } catch (Exception ex) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
     }
+
+    @GetMapping(ConstantAPI.SORT_BIRD_BY_PRICE_ASC)
+    public ResponseEntity<List<BirdResponse>> sortBirdByPriceAscending() throws CustomException {
+        try {
+            return new ResponseEntity<>(birdService.sortBirdByPriceAscending(), HttpStatus.OK);
+        } catch (Exception ex) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @GetMapping(ConstantAPI.SORT_BIRD_BY_PRICE_DESC)
+    public ResponseEntity<List<BirdResponse>> sortBirdByPriceDescending() throws CustomException {
+        try {
+            return new ResponseEntity<>(birdService.sortBirdByPriceDescending(), HttpStatus.OK);
+        } catch (Exception ex) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @GetMapping(ConstantAPI.SORT_BIRD_BY_ALPHABET_ASC)
+    public ResponseEntity<List<BirdResponse>> sortBirdByAlphabetAscending() throws CustomException {
+        try {
+            return new ResponseEntity<>(birdService.sortBirdByProductNameAscending(), HttpStatus.OK);
+        } catch (Exception ex) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @GetMapping(ConstantAPI.SORT_BIRD_BY_ALPHABET_DESC)
+    public ResponseEntity<List<BirdResponse>> sortBirdByAlphabetDescending() throws CustomException {
+        try {
+            return new ResponseEntity<>(birdService.sortBirdByProductNameDescending(), HttpStatus.OK);
+        } catch (Exception ex) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @PostMapping(ConstantAPI.FILTER_BIRD_BY_REQUEST)
+    public ResponseEntity<List<BirdResponse>> filterBirdByRequest(@RequestBody FilterProduct filterProduct) throws CustomException {
+        try {
+            return new ResponseEntity<>(birdService.filterBirdByCustomerRequest(filterProduct), HttpStatus.OK);
+        } catch (Exception ex) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+    }
+
 }

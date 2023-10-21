@@ -40,18 +40,31 @@ public class ConstantAPI {
     public static final String UPDATE_TYPE_OF_BIRD = "/updateTypeOfBird";
     public static final String GET_TYPE_OF_BIRD_BY_ID = "/getTypeOfBirdByID";
     public static final String GET_ALL_TYPE_OF_BIRD = "/getAllTypeOfBird";
+    public static final String GET_TYPE_OF_BIRD_BY_NAME = "/getTypeOfBirdByName";
 
     // Food Function
     public static final String ADD_FOOD = "/addFood";
     public static final String UPDATE_FOOD = "/updateFood";
     public static final String GET_FOOD_BY_ID = "/getFoodByID";
     public static final String GET_ALL_FOOD = "/getAllFood";
+    public static final String FILTER_FOOD_BY_PRICE = "/filterFoodByPrice";
+    public static final String GET_FOOD_BY_NAME = "/getFoodByName";
+    public static final String SORT_FOOD_BY_PRICE_ASC = "/sortFoodByPriceAscending";
+    public static final String SORT_FOOD_BY_PRICE_DESC = "/sortFoodByPriceDescending";
+    public static final String SORT_FOOD_BY_ALPHABET_ASC = "/sortFoodByAlphabetAscending";
+    public static final String SORT_FOOD_BY_ALPHABET_DESC = "/sortFoodByAlphabetDescending";
 
     // Nest Function
     public static final String ADD_NEST = "/addNest";
     public static final String UPDATE_NEST = "/updateNest";
     public static final String GET_NEST_BY_ID = "/getNestByID";
     public static final String GET_ALL_NEST = "/getAllNest";
+    public static final String FILTER_NEST_BY_PRICE = "/filterNestByPrice";
+    public static final String GET_NEST_BY_NAME = "/getNestByName";
+    public static final String SORT_NEST_BY_PRICE_ASC = "/sortNestByPriceAscending";
+    public static final String SORT_NEST_BY_PRICE_DESC = "/sortNestByPriceDescending";
+    public static final String SORT_NEST_BY_ALPHABET_ASC = "/sortNestByAlphabetAscending";
+    public static final String SORT_NEST_BY_ALPHABET_DESC = "/sortNestByAlphabetDescending";
 
     // Bird Function
     public static final String ADD_BIRD = "/addBird";
@@ -60,7 +73,12 @@ public class ConstantAPI {
     public static final String GET_ALL_BIRD = "/getAllBird";
     public static final String MATCHING_BIRD_FROM_SAME_OWNER = "/matchingSameOwner";
     public static final String MATCHING_BIRD_FROM_DIFFERENT_OWNER = "/matchingDifferentOwner";
-    public static final String MATCHING_BIRD_IN_SHOP = "/matchingBirdInShop";
+    public static final String GET_BIRD_BY_NAME = "/getBirdByName";
+    public static final String SORT_BIRD_BY_PRICE_ASC = "/sortBirdByPriceAscending";
+    public static final String SORT_BIRD_BY_PRICE_DESC = "/sortBirdByPriceDescending";
+    public static final String SORT_BIRD_BY_ALPHABET_ASC = "/sortBirdByAlphabetAscending";
+    public static final String SORT_BIRD_BY_ALPHABET_DESC = "/sortBirdByAlphabetDescending";
+    public static final String FILTER_BIRD_BY_REQUEST = "/filterBirdByRequest";
 
     //Order Function
     public static final String CREATE_ORDER = "/createOrder";
@@ -73,5 +91,10 @@ public class ConstantAPI {
     public static final String GET_VOUCHER_BY_ID = "/getVoucherByID";
     public static final String GET_ALL_VOUCHER = "/getAllVoucher";
     public static final String UPDATE_VOUCHER = "/updateVoucher";
-
+    public static final String GET_VOUCHER_BY_NAME = "/getVoucherByName";
+    public static final String FILTER_VOUCHER_BY_DAY = "/filterVoucherByDate";
+    public static final String SORT_VOUCHER_BY_PRICE_ASC = "/sortVoucherByPriceAscending";
+    public static final String SORT_VOUCHER_BY_PRICE_DESC = "/sortVoucherByPriceDescending";
+    public static final String SORT_VOUCHER_BY_ALPHABET_ASC = "/sortVoucherByAlphabetAscending";
+    public static final String SORT_VOUCHER_BY_ALPHABET_DESC = "/sortVoucherByAlphabetDescending";
 }

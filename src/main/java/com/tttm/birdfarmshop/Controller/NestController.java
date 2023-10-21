@@ -5,6 +5,9 @@ import com.tttm.birdfarmshop.Constant.ConstantParametter;
 import com.tttm.birdfarmshop.DTO.NestDTO;
 import com.tttm.birdfarmshop.Exception.CustomException;
 import com.tttm.birdfarmshop.Service.NestService;
+import com.tttm.birdfarmshop.Utils.Request.FilterFoodNest;
+import com.tttm.birdfarmshop.Utils.Request.ProductRequest;
+import com.tttm.birdfarmshop.Utils.Response.BirdResponse;
 import com.tttm.birdfarmshop.Utils.Response.MessageResponse;
 
 import com.tttm.birdfarmshop.Utils.Response.ProductResponse;
@@ -59,6 +62,64 @@ public class NestController {
         }
         catch (Exception ex)
         {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @GetMapping(ConstantAPI.FILTER_NEST_BY_PRICE)
+    public ResponseEntity<List<ProductResponse>> filterNestByPrice(@RequestBody FilterFoodNest filterFoodNest) throws CustomException {
+        try {
+            return new ResponseEntity<>(nestService.findNestByPrice(filterFoodNest), HttpStatus.OK);
+        }
+        catch (Exception ex)
+        {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @PostMapping(ConstantAPI.GET_NEST_BY_NAME)
+    public ResponseEntity<List<ProductResponse>> getNestByName(@RequestBody ProductRequest productRequest) throws CustomException {
+        try {
+            return new ResponseEntity<>(nestService.findNestByName(productRequest), HttpStatus.OK);
+        }
+        catch (Exception ex)
+        {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @GetMapping(ConstantAPI.SORT_NEST_BY_PRICE_ASC)
+    public ResponseEntity<List<ProductResponse>> sortNestByPriceAscending() throws CustomException {
+        try {
+            return new ResponseEntity<>(nestService.sortNestByPriceAscending(), HttpStatus.OK);
+        } catch (Exception ex) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @GetMapping(ConstantAPI.SORT_NEST_BY_PRICE_DESC)
+    public ResponseEntity<List<ProductResponse>> sortNestByPriceDescending() throws CustomException {
+        try {
+            return new ResponseEntity<>(nestService.sortNestByPriceDescending(), HttpStatus.OK);
+        } catch (Exception ex) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @GetMapping(ConstantAPI.SORT_NEST_BY_ALPHABET_ASC)
+    public ResponseEntity<List<ProductResponse>> sortNestByAlphabetAscending() throws CustomException {
+        try {
+            return new ResponseEntity<>(nestService.sortNestByProductNameAscending(), HttpStatus.OK);
+        } catch (Exception ex) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @GetMapping(ConstantAPI.SORT_NEST_BY_ALPHABET_DESC)
+    public ResponseEntity<List<ProductResponse>> sortNestByAlphabetDescending() throws CustomException {
+        try {
+            return new ResponseEntity<>(nestService.sortNestByProductNameDescending(), HttpStatus.OK);
+        } catch (Exception ex) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
     }

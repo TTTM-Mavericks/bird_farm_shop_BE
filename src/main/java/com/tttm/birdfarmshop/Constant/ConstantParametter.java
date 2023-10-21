@@ -14,4 +14,7 @@ public class ConstantParametter {
     public static final String BIRD_ID = "/{BirdID}";
     public static final String ORDER_ID = "/{OrderID}";
     public static final String VOUCHER_ID = "/{VoucherID}";
+    public static final String VOUCHER_NAME = "/{VoucherName}";
+    public static final String TYPE_OF_BIRD_NAME = "/{TypeOfBirdName}";
+    public static final String BIRD_NAME = "/{BirdName}";
 }
