@@ -7,6 +7,7 @@ import com.tttm.birdfarmshop.Models.*;
 import com.tttm.birdfarmshop.Repository.*;
 import com.tttm.birdfarmshop.Service.BirdService;
 import com.tttm.birdfarmshop.Utils.Request.BirdRequest;
+import com.tttm.birdfarmshop.Utils.Request.FilterProduct;
 import com.tttm.birdfarmshop.Utils.Response.BirdMatchingResponse;
 import com.tttm.birdfarmshop.Utils.Response.BirdResponse;
 import com.tttm.birdfarmshop.Utils.Response.MessageResponse;
@@ -14,12 +15,14 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Service;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -60,7 +63,7 @@ public class BirdServiceImpl implements BirdService {
                          .productName(dto.getProductName())
                          .price(dto.getPrice())
                          .description(dto.getDescription())
-                         .typeOfProduct(dto.getTypeOfProduct())
+                         .typeOfProduct(dto.getTypeOfProduct().toUpperCase())
                          .feedback(dto.getFeedback())
                          .rating(dto.getRating())
                          .productStatus(ProductStatus.AVAILABLE)
@@ -122,7 +125,7 @@ public class BirdServiceImpl implements BirdService {
                 product.setProductName(dto.getProductName());
                 product.setPrice(dto.getPrice());
                 product.setDescription(dto.getDescription());
-                product.setTypeOfProduct(dto.getTypeOfProduct());
+                product.setTypeOfProduct(dto.getTypeOfProduct().toUpperCase());
                 product.setFeedback(dto.getFeedback());
                 product.setRating(dto.getRating());
                 product.setQuantity(dto.getQuantity());
@@ -216,7 +219,7 @@ public class BirdServiceImpl implements BirdService {
             .productName(product.getProductName())
             .price(product.getPrice())
             .description(product.getDescription())
-            .typeOfProduct(product.getTypeOfProduct())
+            .typeOfProduct(product.getTypeOfProduct().toUpperCase())
             .images(
                     imageRepository.findImageByProductID(product.getProductID())
                             .stream()
@@ -249,7 +252,7 @@ public class BirdServiceImpl implements BirdService {
         return (float)((firstNum + secondNum)/100)%100;
     }
 
-    private <T> long birdToNum(T bird){
+    private long birdToNum(BirdRequest bird){
         try {
             // Tạo một đối tượng MessageDigest với thuật toán MD5
             MessageDigest md = MessageDigest.getInstance("MD5");
@@ -350,18 +353,18 @@ public class BirdServiceImpl implements BirdService {
     }
 
     @Override
-    public List<BirdResponse> matchingBirdDifferentOwner(BirdRequest firstBird) {
+    public MessageResponse matchingBirdDifferentOwner(BirdRequest firstBird) {
         if(!checkBirdInfo(firstBird)){
-            return null;
+            return new MessageResponse("The Bird: " + firstBird.toString() + " is not eligible for pairing");
         }
-        List<BirdResponse> birdlist = findAllBird();
-        List<BirdResponse> responseList = null;
+        List<BirdRequest> birdlist = getBirdList();
+        List<BirdMatchingResponse> responseList = null;
 
-        for (BirdResponse secondBird: birdlist ) {
-//            if(!checkBirdInfo(secondBird)){
-//                continue;
-//            }
-            if(!firstBird.getTypeOfBird().equals(secondBird.getTypeOfBirdID())){
+        for (BirdRequest secondBird: birdlist ) {
+            if(!checkBirdInfo(secondBird)){
+                continue;
+            }
+            if(!firstBird.getTypeOfBird().equals(secondBird.getTypeOfBird())){
                 continue;
             }
             if(firstBird.getGender() == secondBird.getGender()){
@@ -371,42 +374,198 @@ public class BirdServiceImpl implements BirdService {
             if(simulate < 50f){
                 continue;
             }
-//            BirdMatchingResponse expectedResult = caculateResult(firstBird, secondBird);
-//            expectedResult.setSuccessRate(simulate);
-//            expectedResult.setStatus(BirdMatchingStatus.OK);
+            BirdMatchingResponse expectedResult = caculateResult(firstBird, secondBird);
+            expectedResult.setSuccessRate(simulate);
+            expectedResult.setStatus(BirdMatchingStatus.OK);
             if(responseList == null){
                 responseList = new ArrayList<>();
+                responseList.add(expectedResult);
             }
-            responseList.add(secondBird);
         }
-        return responseList;
+        return new MessageResponse(responseList.toString());
     }
 
     @Override
-    public List<BirdResponse> matchingBirdInShop(String id) {
-        List<BirdResponse> responseList = null;
-        List<BirdResponse> birdlist = findAllBird();
-//        logger.info("BirdId: " + id);
-        BirdResponse firstBird = findBirdByBirdID(id);
-        for (BirdResponse secondBird : birdlist ) {
-            if(secondBird.getProductID().equals(id)){
-                continue;
-            }
-            if(!firstBird.getGender() == (secondBird.getGender())){
-                continue;
-            }
-            if(firstBird.getTypeOfBirdID() != secondBird.getTypeOfBirdID()){
-                continue;
-            }
-            float simulate = simulateMatching(birdToNum(firstBird),birdToNum(secondBird));
-            if(simulate < 50f){
-                continue;
-            }
-            if(responseList == null){
-                responseList = new ArrayList<>();
-            }
-            responseList.add(secondBird);
+    public List<BirdResponse> findBirdByName(String name) {
+        return productRepository
+                .findAll()
+                .stream()
+                .filter(bird -> bird.getProductName().contains(name))
+                .map(product -> birdRepository.findById(product.getProductID())
+                        .map(Bird -> mapperedToBirdRepsonse(product, Bird))
+                        .orElse(null)
+                )
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<BirdResponse> sortBirdByPriceAscending() {
+        List<Product> products = productRepository.sortProductByPriceAndTypeOfProductAscending("BIRD");
+        return products
+                .stream()
+                .map(product -> birdRepository.findById(product.getProductID())
+                        .map(bird -> mapperedToBirdRepsonse(product, bird))
+                        .orElse(null))
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<BirdResponse> sortBirdByPriceDescending() {
+        List<Product> products = productRepository.sortProductByPriceAndTypeOfProductDescending("BIRD");
+        return products
+                .stream()
+                .map(product -> birdRepository.findById(product.getProductID())
+                        .map(bird -> mapperedToBirdRepsonse(product, bird))
+                        .orElse(null))
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<BirdResponse> sortBirdByProductNameAscending() {
+        List<Product> products = productRepository.sortProductByProductNameAndTypeOfProductAscending("BIRD");
+        return products
+                .stream()
+                .map(product -> birdRepository.findById(product.getProductID())
+                        .map(bird -> mapperedToBirdRepsonse(product, bird))
+                        .orElse(null)
+                )
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+
+    }
+
+    @Override
+    public List<BirdResponse> sortBirdByProductNameDescending() {
+        List<Product> products = productRepository.sortProductByProductNameAndTypeOfProductDescending("BIRD");
+        return products
+                .stream()
+                .map(product -> birdRepository.findById(product.getProductID())
+                        .map(bird -> mapperedToBirdRepsonse(product, bird))
+                        .orElse(null)
+                )
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+    }
+
+    private List<Product> getListProductByAge(List<Product> products, int left_range_age, int right_range_age)
+    {
+        return products.stream()
+                .filter(product -> birdRepository.findById(product.getProductID())
+                        .map(Bird::getAge)
+                        .filter(age -> age >= left_range_age && age <= right_range_age)
+                        .isPresent()
+                )
+                .collect(Collectors.toList());
+    }
+
+    private List<Product> getListProductByGender(List<Product> products, boolean gender)
+    {
+        return products.stream()
+                .filter(product -> birdRepository.findById(product.getProductID())
+                        .map(Bird::getGender)
+                        .filter(birdGender -> birdGender == gender)
+                        .isPresent()
+                )
+                .collect(Collectors.toList());
+    }
+
+    private List<Product> getListProductByFertility(List<Product> products, boolean fertility)
+    {
+        return products.stream()
+                .filter(product -> birdRepository.findById(product.getProductID())
+                        .map(Bird::getFertility)
+                        .filter(birdFertility -> birdFertility == fertility)
+                        .isPresent()
+                )
+                .collect(Collectors.toList());
+    }
+
+    private List<Product> getListProductByTypeOfBirdName(List<Product> products, String TypeOfBirdName)
+    {
+        return products.stream()
+                .filter(product -> birdRepository.findById(product.getProductID())
+                        .map(bird -> typeOfBirdRepository.findTypeOfBirdByBirdId(bird.getBirdID()))
+                        .filter(typeOfBirds -> typeOfBirds.stream()
+                                .anyMatch(typeOfBird -> typeOfBird.getTypeName().equals(TypeOfBirdName)))
+                        .isPresent())
+                .collect(Collectors.toList());
+    }
+
+    private List<Product> getListProductByPrice(List<Product> products, Double leftRangePrice, Double rightRangePrice) {
+        return products.stream()
+                .filter(product -> birdRepository.findById(product.getProductID())
+                        .map(bird -> product.getPrice() >= leftRangePrice && product.getPrice() <= rightRangePrice)
+                        .orElse(false)
+                )
+                .collect(Collectors.toList());
+    }
+
+    private List<Product> getListProductByColor(List<Product> products, String color)
+    {
+        return products.stream()
+                .filter(product -> birdRepository.findById(product.getProductID())
+                        .map(Bird::getColor)
+                        .filter(birdColor -> birdColor.equals(color.toUpperCase()))
+                        .isPresent()
+                )
+                .collect(Collectors.toList());
+    }
+
+
+    @Override
+    public List<BirdResponse> filterBirdByCustomerRequest(FilterProduct filterProduct) {
+        List<Product> products = productRepository.findAll();
+        logger.info("Inside Initial Filter Bird: " + products.size());
+
+        if(!filterProduct.getLeft_range_age().isEmpty() && !filterProduct.getLeft_range_age().isBlank()
+                && !filterProduct.getRight_range_age().isEmpty() && !filterProduct.getRight_range_age().isBlank())
+        {
+            products = getListProductByAge(products, Integer.parseInt(filterProduct.getLeft_range_age()), Integer.parseInt(filterProduct.getRight_range_age()));
+            logger.info("Inside Check Age Filter Bird: " + products.size());
         }
-        return responseList;
+
+        if(!filterProduct.getGender().isEmpty() && !filterProduct.getGender().isBlank())
+        {
+            products = getListProductByGender(products, Boolean.parseBoolean(filterProduct.getGender()));
+            logger.info("Inside Check Gender Filter Bird: " + products.size());
+        }
+
+        if(!filterProduct.getFertility().isBlank() && !filterProduct.getFertility().isEmpty())
+        {
+            products = getListProductByFertility(products, Boolean.parseBoolean(filterProduct.getFertility()));
+            logger.info("Inside Check Fertility Filter Bird: " + products.size());
+        }
+
+        if(!filterProduct.getTypeOfBirdName().isEmpty() && !filterProduct.getTypeOfBirdName().isBlank())
+        {
+            products = getListProductByTypeOfBirdName(products, filterProduct.getTypeOfBirdName());
+            logger.info("Inside Check TypeOfBirdName Filter Bird: " + products.size());
+        }
+
+        if(!filterProduct.getLeft_range_price().isEmpty() && !filterProduct.getLeft_range_price().isBlank()
+                && !filterProduct.getRight_range_price().isEmpty() && !filterProduct.getRight_range_price().isBlank())
+        {
+            products = getListProductByPrice(products, Double.parseDouble(filterProduct.getLeft_range_price()), Double.parseDouble(filterProduct.getRight_range_price()));
+            logger.info("Inside Check Price Filter Bird: " + products.size());
+        }
+
+        if(!filterProduct.getColor().isEmpty() && !filterProduct.getColor().isBlank())
+        {
+            products = getListProductByColor(products, filterProduct.getColor());
+            logger.info("Inside Check Color Filter Bird: " + products.size());
+        }
+
+        logger.info("After Check All Filter Request");
+        return products
+                .stream()
+                .map(product -> birdRepository.findById(product.getProductID())
+                        .map(bird -> mapperedToBirdRepsonse(product, bird))
+                        .orElse(null)
+                )
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
     }
 }

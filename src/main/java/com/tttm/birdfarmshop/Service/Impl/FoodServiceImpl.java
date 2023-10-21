@@ -9,13 +9,20 @@ import com.tttm.birdfarmshop.Repository.FoodRepository;
 import com.tttm.birdfarmshop.Repository.ImageRepository;
 import com.tttm.birdfarmshop.Repository.ProductRepository;
 import com.tttm.birdfarmshop.Service.FoodService;
+import com.tttm.birdfarmshop.Utils.Request.FilterFoodNest;
+import com.tttm.birdfarmshop.Utils.Request.ProductRequest;
 import com.tttm.birdfarmshop.Utils.Response.MessageResponse;
 import com.tttm.birdfarmshop.Utils.Response.ProductResponse;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -25,6 +32,7 @@ public class FoodServiceImpl implements FoodService {
     private final FoodRepository foodRepository;
     private final ProductRepository productRepository;
     private final ImageRepository imageRepository;
+    private final Logger logger = LoggerFactory.getLogger(FoodServiceImpl.class);
     private boolean isValidFood(FoodDTO dto)
     {
         return !dto.getProductName().isBlank() && !dto.getProductName().isEmpty() && dto.getPrice() >= 0
@@ -43,7 +51,7 @@ public class FoodServiceImpl implements FoodService {
                     .productName(dto.getProductName())
                     .price(dto.getPrice())
                     .description(dto.getDescription())
-                    .typeOfProduct(dto.getTypeOfProduct())
+                    .typeOfProduct(dto.getTypeOfProduct().toUpperCase())
                     .feedback(dto.getFeedback())
                     .rating(dto.getRating())
                     .productStatus(ProductStatus.AVAILABLE)
@@ -82,7 +90,7 @@ public class FoodServiceImpl implements FoodService {
                                 food.setProductName(dto.getProductName());
                                 food.setPrice(dto.getPrice());
                                 food.setDescription(dto.getDescription());
-                                food.setTypeOfProduct(dto.getTypeOfProduct());
+                                food.setTypeOfProduct(dto.getTypeOfProduct().toUpperCase());
                                 food.setFeedback(dto.getFeedback());
                                 food.setRating(dto.getRating());
                                 food.setQuantity(dto.getQuantity());
@@ -119,7 +127,7 @@ public class FoodServiceImpl implements FoodService {
                 .productName(product.getProductName())
                 .price(product.getPrice())
                 .description(product.getDescription())
-                .typeOfProduct(product.getTypeOfProduct())
+                .typeOfProduct(product.getTypeOfProduct().toUpperCase())
                 .images(
                         imageRepository.findImageByProductID(product.getProductID())
                                 .stream()
@@ -153,6 +161,76 @@ public class FoodServiceImpl implements FoodService {
     @Override
     public List<ProductResponse> findAllFood() {
         return productRepository.findAllFood()
+                .stream()
+                .map(this::mapperedToProductResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<ProductResponse> findFoodByPrice(FilterFoodNest filterFoodNest) {
+        if(filterFoodNest.getLeft_range_price() > filterFoodNest.getRight_range_price()) return null;
+
+        return productRepository.findAll()
+                .stream()
+                .filter(product -> product.getPrice() <= filterFoodNest.getRight_range_price() && product.getPrice() >= filterFoodNest.getLeft_range_price()
+                        && product.getTypeOfProduct().toUpperCase().equals(filterFoodNest.getTypeOfProduct().toUpperCase()))
+                .map(this::mapperedToProductResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<ProductResponse> findFoodByName(ProductRequest productRequest) {
+//        List<Product> products = productRepository.findAllFood();
+//        List<ProductResponse> list = new ArrayList<>();
+//        for (Product product : products)
+//        {
+//            if(product.getTypeOfProduct().equals(productRequest.getTypeOfProduct().toUpperCase())
+//              && product.getProductName().contains(productRequest.getProductName()))
+//            {
+//                list.add(mapperedToProductResponse(product));
+//            }
+//        }
+//        return list;
+        return productRepository.findAll()
+                .stream()
+                .filter(product -> product.getTypeOfProduct().equals(productRequest.getTypeOfProduct().toUpperCase())
+                        && product.getProductName().contains(productRequest.getProductName()))
+                .map(this::mapperedToProductResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<ProductResponse> sortFoodByPriceAscending() {
+        return productRepository
+                .sortProductByPriceAndTypeOfProductAscending("FOOD")
+                .stream()
+                .map(this::mapperedToProductResponse)
+                .collect(Collectors.toList());
+
+    }
+
+    @Override
+    public List<ProductResponse> sortFoodByPriceDescending() {
+        return productRepository
+                .sortProductByPriceAndTypeOfProductDescending("FOOD")
+                .stream()
+                .map(this::mapperedToProductResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<ProductResponse> sortFoodByProductNameAscending() {
+        return productRepository
+                .sortProductByProductNameAndTypeOfProductAscending("FOOD")
+                .stream()
+                .map(this::mapperedToProductResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<ProductResponse> sortFoodByProductNameDescending() {
+        return productRepository
+                .sortProductByProductNameAndTypeOfProductDescending("FOOD")
                 .stream()
                 .map(this::mapperedToProductResponse)
                 .collect(Collectors.toList());

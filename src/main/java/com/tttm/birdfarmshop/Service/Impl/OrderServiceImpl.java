@@ -21,6 +21,8 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.*;
 import java.util.Date;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
 
 @Service
@@ -35,6 +37,7 @@ public class OrderServiceImpl implements OrderService {
     private final VoucherRepository voucherRepository;
     private final ImageRepository imageRepository;
     private final UserRepository userRepository;
+    private Lock lock = new ReentrantLock();
     private final Logger logger = LoggerFactory.getLogger(OrderServiceImpl.class);
 
     private boolean isValidInformation(OrderRequest orderRequest)
@@ -47,102 +50,109 @@ public class OrderServiceImpl implements OrderService {
 
     }
 
-
+    @Transactional
     @Override
     public OrderResponse createOrder(OrderRequest orderRequest) {
-        Optional<Customer> customer = customerRepository.findById(orderRequest.getCustomerID()); // // Check Product ID is existed or not
-        Optional<User> user =  userRepository.findById(orderRequest.getCustomerID());
-        if(customer.isEmpty() || !isValidInformation(orderRequest) || user.get().getAccountStatus() == AccountStatus.INACTIVE) // Check validation fields
+        try
         {
-            logger.info("Customer ID, Order Information is Invalid or Your Account is banned");
-            return new OrderResponse();
-        }
-
-        float orderAmount = 0;
-        List<String> listProductID = orderRequest.getListProduct();
-        List<Product> productList = new ArrayList<>();
-        for(String productID : listProductID)  // Check Product ID is existed or not
-        {
-            Optional<Product> product = productRepository.findById(productID);
-            if (product.isPresent())
+            lock.lock();
+            Optional<Customer> customer = customerRepository.findById(orderRequest.getCustomerID()); // // Check Product ID is existed or not
+            Optional<User> user =  userRepository.findById(orderRequest.getCustomerID());
+            if(customer.isEmpty() || !isValidInformation(orderRequest) || user.get().getAccountStatus() == AccountStatus.INACTIVE) // Check validation fields
             {
-                if(product.get().getProductStatus().toString().equals(ProductStatus.UNAVAILABLE.toString()))
-                {
-                    logger.info("Product ID is Unavailable");
+                logger.info("Customer ID, Order Information is Invalid or Your Account is banned");
+                return new OrderResponse();
+            }
+
+            float orderAmount = 0;
+            List<String> listProductID = orderRequest.getListProduct();
+            List<Product> productList = new ArrayList<>();
+            for(String productID : listProductID)  // Check Product ID is existed or not
+            {
+                Optional<Product> productOptional = productRepository.findById(productID);
+                if (productOptional.isEmpty()) {
+                    logger.info("Product ID is not existed");
                     return new OrderResponse();
                 }
-                else {
-                    productList.add(product.get());
-                    orderAmount += product.get().getPrice();
+                Product product = productOptional.get();
+                if (product.getProductStatus() == ProductStatus.UNAVAILABLE || product.getQuantity() <= 0) {
+                    logger.info("Product ID is Unavailable or out of stock");
+                    return new OrderResponse();
+                }
+                productList.add(product);
+                orderAmount += product.getPrice();
+            }
+
+            // Apply Voucher to the Order
+            List<Voucher> voucherList = new ArrayList<>();
+            List<String> voucherStringList = orderRequest.getVoucherList();
+            for(String voucherID : voucherStringList)
+            {
+                Optional<Voucher> voucher = voucherRepository.findById(Integer.parseInt(voucherID));
+                if(voucher.isEmpty() || voucher.get().getVoucherStatus().equals(VoucherStatus.UNAVAILABLE))
+                {
+                    logger.info("Voucher ID is not existed to apply voucher");
+                    return new OrderResponse();
+                }
+                else // Apply Voucher to Order
+                {
+                    orderAmount -= voucher.get().getValue();
+                    voucherList.add(voucher.get());
                 }
             }
-            else
-            {
-                logger.info("Product ID is not existed");
-                return new OrderResponse();
-            }
-        }
 
-        // Apply Voucher to the Order
-        List<Voucher> voucherList = new ArrayList<>();
-        List<String> voucherStringList = orderRequest.getVoucherList();
-        for(String voucherID : voucherStringList)
+            LocalDateTime currentTime = LocalDateTime.now(); // Get Current Time when Order Product
+            Date orderDate = Date.from(currentTime.atZone(ZoneId.systemDefault()).toInstant());
+
+            // Choose random shipper to take care the Order
+            List<Shipper> shipperList = shipperRepository.findAll();
+            Random random = new Random();
+            int randomShipperIndex = random.nextInt(shipperList.size());
+            Shipper shipper = shipperList.get(randomShipperIndex);
+
+            orderRepository.save(
+                    Order.builder()
+                            .customerPhone(orderRequest.getCustomerPhone())
+                            .customerName(orderRequest.getCustomerName())
+                            .customerEmail(orderRequest.getCustomerEmail())
+                            .customerAddress(orderRequest.getCustomerAddress())
+                            .note(orderRequest.getNote())
+                            .status(OrderStatus.PENDING)
+                            .amount(orderAmount)
+                            .orderDate(orderDate)
+                            .customer(customer.get())
+                            .shipper(shipper)
+                            .build()
+            );
+
+            // Get the newest Order then Add Order to OrderDetail
+            List<Order> orders = orderRepository.findAll();
+            int size = orderRepository.findAll().size();
+            Order newestOrder = orders.get(size - 1);
+
+            productList.forEach(product ->
+                    {
+                        product.setQuantity(product.getQuantity() - 1);
+                        product.setProductStatus(ProductStatus.UNAVAILABLE);
+                        productRepository.save(product);
+                        orderDetailRepository.save(new OrderDetail(product, newestOrder));
+                    }
+            );
+
+            voucherList.forEach(voucher -> {
+                orderVoucherRepository.save(new OrderVoucher(newestOrder, voucher));
+            });
+
+            return createOrderResponse(newestOrder, productList);
+        }
+        catch (Exception e)
         {
-            Optional<Voucher> voucher = voucherRepository.findById(Integer.parseInt(voucherID));
-            if(voucher.isEmpty() || voucher.get().getVoucherStatus().equals(VoucherStatus.UNAVAILABLE))
-            {
-                logger.info("Voucher ID is not existed to apply voucher");
-                return new OrderResponse();
-            }
-            else // Apply Voucher to Order
-            {
-                orderAmount -= voucher.get().getValue();
-                voucherList.add(voucher.get());
-            }
+            e.printStackTrace();
         }
-
-        LocalDateTime currentTime = LocalDateTime.now(); // Get Current Time when Order Product
-        Date orderDate = Date.from(currentTime.atZone(ZoneId.systemDefault()).toInstant());
-
-        // Choose random shipper to take care the Order
-        List<Shipper> shipperList = shipperRepository.findAll();
-        Random random = new Random();
-        int randomShipperIndex = random.nextInt(shipperList.size());
-        Shipper shipper = shipperList.get(randomShipperIndex);
-
-        orderRepository.save(
-                Order.builder()
-                        .customerPhone(orderRequest.getCustomerPhone())
-                        .customerName(orderRequest.getCustomerName())
-                        .customerEmail(orderRequest.getCustomerEmail())
-                        .customerAddress(orderRequest.getCustomerAddress())
-                        .note(orderRequest.getNote())
-                        .status(OrderStatus.PENDING)
-                        .amount(orderAmount)
-                        .orderDate(orderDate)
-                        .customer(customer.get())
-                        .shipper(shipper)
-                        .build()
-        );
-
-        // Get the newest Order then Add Order to OrderDetail
-        List<Order> orders = orderRepository.findAll();
-        int size = orderRepository.findAll().size();
-        Order newestOrder = orders.get(size - 1);
-
-        productList.forEach(product ->
-            {
-                product.setProductStatus(ProductStatus.UNAVAILABLE);
-                productRepository.save(product);
-                orderDetailRepository.save(new OrderDetail(product, newestOrder));
-            }
-        );
-
-        voucherList.forEach(voucher -> {
-            orderVoucherRepository.save(new OrderVoucher(newestOrder, voucher));
-        });
-
-        return createOrderResponse(newestOrder, productList);
+        finally {
+            lock.unlock();
+        }
+        return new OrderResponse();
     }
 
     @Override

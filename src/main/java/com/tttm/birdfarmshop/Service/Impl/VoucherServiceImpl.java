@@ -6,6 +6,7 @@ import com.tttm.birdfarmshop.Models.Voucher;
 import com.tttm.birdfarmshop.Repository.SellerRepository;
 import com.tttm.birdfarmshop.Repository.VoucherRepository;
 import com.tttm.birdfarmshop.Service.VoucherService;
+import com.tttm.birdfarmshop.Utils.Request.FilterVoucher;
 import com.tttm.birdfarmshop.Utils.Request.VoucherRequest;
 import com.tttm.birdfarmshop.Utils.Response.MessageResponse;
 import com.tttm.birdfarmshop.Utils.Response.VoucherResponse;
@@ -14,12 +15,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.Date;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -153,5 +153,95 @@ public class VoucherServiceImpl implements VoucherService {
                 .sellerID(voucher.getSeller().getSellerID())
                 .voucherStatus(voucher.getVoucherStatus().toString())
                 .build();
+    }
+
+    @Override
+    public List<VoucherResponse> findVoucherByName(String name) {
+        return voucherRepository
+                .findAll()
+                .stream()
+                .filter(voucher -> voucher.getVoucherName().contains(name))
+                .map(this::createVoucherResponse)
+                .collect(Collectors.toList());
+    }
+
+    private Date convertDateToFormatPattern(Date date, String target) throws ParseException {
+        SimpleDateFormat outputFormat = new SimpleDateFormat("MMM dd HH:mm:ss z yyyy");
+        TimeZone timeZone = TimeZone.getTimeZone("ICT");
+        outputFormat.setTimeZone(timeZone);
+        String outputDateString = outputFormat.format(date);
+
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+
+        if (target.equals("start")) {
+            // Set the time to 00:00:00
+            calendar.set(Calendar.HOUR_OF_DAY, 0);
+            calendar.set(Calendar.MINUTE, 0);
+            calendar.set(Calendar.SECOND, 0);
+        } else if (target.equals("end")) {
+            // Set the time to 23:59:59
+            calendar.set(Calendar.HOUR_OF_DAY, 23);
+            calendar.set(Calendar.MINUTE, 59);
+            calendar.set(Calendar.SECOND, 59);
+        } else {
+            throw new IllegalArgumentException("Invalid target: " + target);
+        }
+
+        return calendar.getTime();
+    }
+
+    @Override
+    public List<VoucherResponse> searchVoucherByDate(FilterVoucher filterVoucher) throws ParseException {
+        Date startDate = convertDateToFormatPattern(filterVoucher.getStartDate(), "start");
+        Date endDate = convertDateToFormatPattern(filterVoucher.getEndDate(), "end");
+
+        if(startDate.compareTo(endDate) > 0)  return null;
+
+        return voucherRepository.findAll()
+                .stream()
+                .filter(voucher -> {
+                    try {
+                        Date voucherStartDate = convertDateToFormatPattern(voucher.getStartDate(), "start");
+                        Date voucherEndDate = convertDateToFormatPattern(voucher.getEndDate(), "end");
+                        return startDate.compareTo(voucherStartDate) <= 0 && endDate.compareTo(voucherEndDate) >= 0;
+                    } catch (ParseException e) {
+                        throw new RuntimeException(e);
+                    }
+                })
+                .map(this::createVoucherResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<VoucherResponse> sortVoucherByPriceAscending() {
+        return voucherRepository.sortVoucherByPriceAscending()
+                .stream()
+                .map(this::createVoucherResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<VoucherResponse> sortVoucherByPriceDescending() {
+        return voucherRepository.sortVoucherByPriceDescending()
+                .stream()
+                .map(this::createVoucherResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<VoucherResponse> sortVoucherByAlphabetAscending() {
+        return voucherRepository.sortVoucherByAlphabetAscending()
+                .stream()
+                .map(this::createVoucherResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<VoucherResponse> sortVoucherByAlphabetDescending() {
+        return voucherRepository.sortVoucherByAlphabetDescending()
+                .stream()
+                .map(this::createVoucherResponse)
+                .collect(Collectors.toList());
     }
 }

@@ -10,10 +10,13 @@ import com.tttm.birdfarmshop.Repository.ImageRepository;
 import com.tttm.birdfarmshop.Repository.NestRepository;
 import com.tttm.birdfarmshop.Repository.ProductRepository;
 import com.tttm.birdfarmshop.Service.NestService;
+import com.tttm.birdfarmshop.Utils.Request.FilterFoodNest;
+import com.tttm.birdfarmshop.Utils.Request.ProductRequest;
 import com.tttm.birdfarmshop.Utils.Response.MessageResponse;
 import com.tttm.birdfarmshop.Utils.Response.ProductResponse;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -43,7 +46,7 @@ public class NestServiceImpl implements NestService {
                     .productName(dto.getProductName())
                     .price(dto.getPrice())
                     .description(dto.getDescription())
-                    .typeOfProduct(dto.getTypeOfProduct())
+                    .typeOfProduct(dto.getTypeOfProduct().toUpperCase())
                     .feedback(dto.getFeedback())
                     .rating(dto.getRating())
                     .productStatus(ProductStatus.AVAILABLE)
@@ -82,7 +85,7 @@ public class NestServiceImpl implements NestService {
                                 nest.setProductName(dto.getProductName());
                                 nest.setPrice(dto.getPrice());
                                 nest.setDescription(dto.getDescription());
-                                nest.setTypeOfProduct(dto.getTypeOfProduct());
+                                nest.setTypeOfProduct(dto.getTypeOfProduct().toUpperCase());
                                 nest.setFeedback(dto.getFeedback());
                                 nest.setRating(dto.getRating());
                                 nest.setQuantity(dto.getQuantity());
@@ -151,6 +154,64 @@ public class NestServiceImpl implements NestService {
     @Override
     public List<ProductResponse> findAllNest() {
         return productRepository.findAllNest()
+                .stream()
+                .map(this::mapperedToProductResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<ProductResponse> findNestByPrice(FilterFoodNest filterFoodNest) {
+        if(filterFoodNest.getLeft_range_price() > filterFoodNest.getRight_range_price()) return null;
+
+        return productRepository.findAll()
+                .stream()
+                .filter(product -> product.getPrice() <= filterFoodNest.getRight_range_price() && product.getPrice() >= filterFoodNest.getLeft_range_price()
+                        && product.getTypeOfProduct().toUpperCase().equals(filterFoodNest.getTypeOfProduct().toUpperCase()))
+                .map(this::mapperedToProductResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<ProductResponse> findNestByName(ProductRequest productRequest) {
+        return productRepository.findAll()
+                .stream()
+                .filter(product -> product.getTypeOfProduct().equals(productRequest.getTypeOfProduct().toUpperCase())
+                        && product.getProductName().contains(productRequest.getProductName()))
+                .map(this::mapperedToProductResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<ProductResponse> sortNestByPriceAscending() {
+        return productRepository
+                .sortProductByPriceAndTypeOfProductAscending("NEST")
+                .stream()
+                .map(this::mapperedToProductResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<ProductResponse> sortNestByPriceDescending() {
+        return productRepository
+                .sortProductByPriceAndTypeOfProductDescending("NEST")
+                .stream()
+                .map(this::mapperedToProductResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<ProductResponse> sortNestByProductNameAscending() {
+        return productRepository
+                .sortProductByProductNameAndTypeOfProductAscending("NEST")
+                .stream()
+                .map(this::mapperedToProductResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<ProductResponse> sortNestByProductNameDescending() {
+        return productRepository
+                .sortProductByProductNameAndTypeOfProductDescending("NEST")
                 .stream()
                 .map(this::mapperedToProductResponse)
                 .collect(Collectors.toList());

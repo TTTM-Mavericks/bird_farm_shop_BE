@@ -4,8 +4,10 @@ import com.tttm.birdfarmshop.Constant.ConstantAPI;
 import com.tttm.birdfarmshop.Constant.ConstantParametter;
 import com.tttm.birdfarmshop.Exception.CustomException;
 import com.tttm.birdfarmshop.Service.VoucherService;
+import com.tttm.birdfarmshop.Utils.Request.FilterVoucher;
 import com.tttm.birdfarmshop.Utils.Request.VoucherRequest;
 import com.tttm.birdfarmshop.Utils.Response.MessageResponse;
+import com.tttm.birdfarmshop.Utils.Response.ProductResponse;
 import com.tttm.birdfarmshop.Utils.Response.VoucherResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -64,4 +66,61 @@ public class VoucherController {
         }
     }
 
+    @GetMapping(ConstantAPI.FILTER_VOUCHER_BY_DAY)
+    public ResponseEntity<List<VoucherResponse>> searchVoucherByDate(@RequestBody FilterVoucher filterVoucher) throws CustomException {
+        try {
+            return new ResponseEntity<>(voucherService.searchVoucherByDate(filterVoucher), HttpStatus.OK);
+        }
+        catch (Exception ex)
+        {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @PostMapping(ConstantAPI.GET_VOUCHER_BY_NAME + ConstantParametter.VOUCHER_NAME)
+    public ResponseEntity<List<VoucherResponse>> getVoucherByName(@PathVariable("VoucherName") String VoucherName) throws CustomException {
+        try {
+            return new ResponseEntity<>(voucherService.findVoucherByName(VoucherName), HttpStatus.OK);
+        }
+        catch (Exception ex)
+        {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
+    }
+
+    @GetMapping(ConstantAPI.SORT_VOUCHER_BY_PRICE_ASC)
+    public ResponseEntity<List<VoucherResponse>> sortFoodByPriceAscending() throws CustomException {
+        try {
+            return new ResponseEntity<>(voucherService.sortVoucherByPriceAscending(), HttpStatus.OK);
+        } catch (Exception ex) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @GetMapping(ConstantAPI.SORT_VOUCHER_BY_PRICE_DESC)
+    public ResponseEntity<List<VoucherResponse>> sortFoodByPriceDescending() throws CustomException {
+        try {
+            return new ResponseEntity<>(voucherService.sortVoucherByPriceDescending(), HttpStatus.OK);
+        } catch (Exception ex) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @GetMapping(ConstantAPI.SORT_VOUCHER_BY_ALPHABET_ASC)
+    public ResponseEntity<List<VoucherResponse>> sortVoucherByAlphabetAscending() throws CustomException {
+        try {
+            return new ResponseEntity<>(voucherService.sortVoucherByAlphabetAscending(), HttpStatus.OK);
+        } catch (Exception ex) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @GetMapping(ConstantAPI.SORT_VOUCHER_BY_ALPHABET_DESC)
+    public ResponseEntity<List<VoucherResponse>> sortVoucherByAlphabetDescending() throws CustomException {
+        try {
+            return new ResponseEntity<>(voucherService.sortVoucherByAlphabetDescending(), HttpStatus.OK);
+        } catch (Exception ex) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+    }
 }

@@ -3,6 +3,7 @@ package com.tttm.birdfarmshop.Service;
 import com.tttm.birdfarmshop.DTO.TypeOfBirdDTO;
 import com.tttm.birdfarmshop.Models.TypeOfBird;
 import com.tttm.birdfarmshop.Utils.Response.MessageResponse;
+import com.tttm.birdfarmshop.Utils.Response.ProductResponse;
 import com.tttm.birdfarmshop.Utils.Response.TypeOfBirdResponse;
 
 import java.util.Enumeration;
@@ -17,4 +18,5 @@ public interface TypeOfBirdService {
 
     List<TypeOfBirdResponse> findAllTypeOfBird();
 
+    List<TypeOfBirdResponse> findTypeOfBirdByName(String name);
 }

@@ -64,4 +64,15 @@ public class TypeOfBirdController {
         }
     }
 
+    @PostMapping(ConstantAPI.GET_TYPE_OF_BIRD_BY_NAME + ConstantParametter.TYPE_OF_BIRD_NAME)
+    public ResponseEntity<List<TypeOfBirdResponse>> getTypeOfBirdByName(@PathVariable("TypeOfBirdName") String TypeOfBirdName) throws CustomException {
+        try {
+            return new ResponseEntity<>(typeOfBirdService.findTypeOfBirdByName(TypeOfBirdName), HttpStatus.OK);
+        }
+        catch (Exception ex)
+        {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
+    }
+
 }

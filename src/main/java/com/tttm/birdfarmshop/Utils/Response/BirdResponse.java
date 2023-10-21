@@ -27,6 +27,7 @@ public class BirdResponse {
     private String feedback;
 
     private Integer rating;
+
     private Integer quantity;
 
     private Integer age;
