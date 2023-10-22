@@ -68,6 +68,7 @@ public class ConstantAPI {
 
     // Bird Function
     public static final String ADD_BIRD = "/addBird";
+    public static final String ADD_BIRD_LIST = "/addBirdList";
     public static final String UPDATE_BIRD = "/updateBird";
     public static final String GET_BIRD_BY_ID = "/getBirdByID";
     public static final String GET_ALL_BIRD = "/getAllBird";
