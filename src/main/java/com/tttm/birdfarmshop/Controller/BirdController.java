@@ -33,6 +33,23 @@ public class BirdController {
         }
     }
 
+    @PostMapping(ConstantAPI.ADD_BIRD_LIST)
+    public ResponseEntity<MessageResponse> addBird(@RequestBody List<BirdDTO> list) throws CustomException {
+        try {
+            MessageResponse ms = new MessageResponse();
+            for (BirdDTO dto: list) {
+                if(ms.getMessage() != null) {
+                    ms.setMessage(ms.getMessage() + "\n" + birdService.AddNewBird(dto).getMessage());
+                } else {
+                    ms.setMessage(birdService.AddNewBird(dto).getMessage());
+                }
+            }
+            return new ResponseEntity<>(ms, HttpStatus.OK);
+        } catch (Exception ex) {
+            return new ResponseEntity<>(new MessageResponse(ex.getMessage()), HttpStatus.FORBIDDEN);
+        }
+    }
+
     @PutMapping(ConstantAPI.UPDATE_BIRD + ConstantParametter.BIRD_ID)
     public ResponseEntity<MessageResponse> updateBird(@PathVariable("BirdID") String BirdID, @RequestBody BirdDTO dto) throws CustomException {
         try {

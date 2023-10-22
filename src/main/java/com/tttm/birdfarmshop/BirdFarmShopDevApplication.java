@@ -1,7 +1,10 @@
 package com.tttm.birdfarmshop;
 
 import com.tttm.birdfarmshop.Enums.AccountStatus;
+import com.tttm.birdfarmshop.Enums.BirdColor;
 import com.tttm.birdfarmshop.Enums.ERole;
+import com.tttm.birdfarmshop.Models.Bird;
+import com.tttm.birdfarmshop.Models.TypeOfBird;
 import com.tttm.birdfarmshop.Models.User;
 import com.tttm.birdfarmshop.Repository.*;
 import com.tttm.birdfarmshop.Service.*;
@@ -26,7 +29,8 @@ public class BirdFarmShopDevApplication {
 											   AdminService adminService,
 											   SellerService sellerService,
 											   ShipperService shipperService,
-											   CustomerService customerService){
+											   CustomerService customerService,
+											   TypeOfBirdRepository typeOfBirdRepository){
 		return args -> {
 			if(userRepository.findAll().size() == 0)
 			{
@@ -106,6 +110,52 @@ public class BirdFarmShopDevApplication {
 				sellerService.createSeller(seller);
 				shipperService.createShipper(shipper);
 				customerService.createCustomer(customer);
+			}
+
+			if(typeOfBirdRepository.findAll().size() == 0)
+			{
+				//------------------------------------
+				var type = TypeOfBird.builder()
+						.typeID("TB001")
+						.typeName("Chim Sẻ")
+						.quantity(0)
+						.build();
+				typeOfBirdRepository.save(type);
+
+				type = TypeOfBird.builder()
+						.typeID("TB002")
+						.typeName("Chim Vẹt")
+						.quantity(0)
+						.build();
+				typeOfBirdRepository.save(type);
+
+				type = TypeOfBird.builder()
+						.typeID("TB003")
+						.typeName("Chim Bồ Câu")
+						.quantity(0)
+						.build();
+				typeOfBirdRepository.save(type);
+
+				type = TypeOfBird.builder()
+						.typeID("TB004")
+						.typeName("Chim Chích Chòe")
+						.quantity(0)
+						.build();
+
+				typeOfBirdRepository.save(type);
+				type = TypeOfBird.builder()
+						.typeID("TB005")
+						.typeName("Chim Chào Mào")
+						.quantity(0)
+						.build();
+
+				typeOfBirdRepository.save(type);
+				type = TypeOfBird.builder()
+						.typeID("TB006")
+						.typeName("Chim Cu Đất")
+						.quantity(0)
+						.build();
+				typeOfBirdRepository.save(type);
 			}
 		};
 	}
