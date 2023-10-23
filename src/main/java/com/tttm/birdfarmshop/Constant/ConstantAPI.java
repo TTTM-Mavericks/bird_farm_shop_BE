@@ -74,6 +74,7 @@ public class ConstantAPI {
     public static final String GET_ALL_BIRD = "/getAllBird";
     public static final String MATCHING_BIRD_FROM_SAME_OWNER = "/matchingSameOwner";
     public static final String MATCHING_BIRD_FROM_DIFFERENT_OWNER = "/matchingDifferentOwner";
+    public static final String MATCHING_BIRD_IN_SHOP = "/matchingBirdInShop";
     public static final String GET_BIRD_BY_NAME = "/getBirdByName";
     public static final String SORT_BIRD_BY_PRICE_ASC = "/sortBirdByPriceAscending";
     public static final String SORT_BIRD_BY_PRICE_DESC = "/sortBirdByPriceDescending";

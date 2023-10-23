@@ -3,6 +3,7 @@ package com.tttm.birdfarmshop.Service.Impl;
 import com.tttm.birdfarmshop.DTO.BirdDTO;
 import com.tttm.birdfarmshop.Enums.BirdMatchingStatus;
 import com.tttm.birdfarmshop.Enums.ProductStatus;
+import com.tttm.birdfarmshop.Exception.CustomException;
 import com.tttm.birdfarmshop.Models.*;
 import com.tttm.birdfarmshop.Repository.*;
 import com.tttm.birdfarmshop.Service.BirdService;
@@ -20,10 +21,7 @@ import org.springframework.stereotype.Service;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -252,7 +250,7 @@ public class BirdServiceImpl implements BirdService {
         return (float)((firstNum + secondNum)/100)%100;
     }
 
-    private long birdToNum(BirdRequest bird){
+    private <T> long birdToNum(T bird){
         try {
             // Tạo một đối tượng MessageDigest với thuật toán MD5
             MessageDigest md = MessageDigest.getInstance("MD5");
@@ -300,29 +298,39 @@ public class BirdServiceImpl implements BirdService {
     }
 
     @Override
-    public MessageResponse matchingBird(BirdRequest firstBird, BirdRequest secondBird) {
+    public BirdResponse matchingBird(BirdRequest firstBird, BirdRequest secondBird) throws CustomException {
         if(!checkBirdInfo(firstBird)){
-            return new MessageResponse("The Bird: " + firstBird.toString() + " is not eligible for pairing");
+            throw new CustomException("The Bird: " + firstBird.toString() + " is not eligible for pairing");
         }
         if(!checkBirdInfo(secondBird)){
-            return new MessageResponse("The Bird: " + secondBird.toString() + " is not eligible for pairing");
+            throw new CustomException("The Bird: " + secondBird.toString() + " is not eligible for pairing");
         }
         if(!firstBird.getTypeOfBird().equals(secondBird.getTypeOfBird())){
-            return new MessageResponse("This pare can not matching. Different type.");
+            throw new CustomException("This pare can not matching. Different type.");
         }
         if(firstBird.getGender() == secondBird.getGender()){
-            return new MessageResponse("This pare can not matching. The same gender.");
+            throw new CustomException("This pare can not matching. The same gender.");
         }
 //        System.out.println(birdToNum(firstBird));
 //        System.out.println(birdToNum(secondBird));
         float simulate = simulateMatching(birdToNum(firstBird),birdToNum(secondBird));
         if(simulate < 50f){
-            return new MessageResponse("The success rate is not good: " + simulate);
+            throw new CustomException("The success rate is not good: " + simulate);
         }
         BirdMatchingResponse expectedResult = caculateResult(firstBird, secondBird);
         expectedResult.setSuccessRate(simulate);
         expectedResult.setStatus(BirdMatchingStatus.OK);
-        return new MessageResponse(expectedResult.toString());
+
+        BirdResponse response = new BirdResponse();
+        response.setAge(0);
+        Random random = new Random();
+        response.setGender(random.nextBoolean());
+        response.setDescription("New Baby Bird");
+        response.setFertility(true);
+        response.setTypeOfBirdID(firstBird.getTypeOfBird());
+        response.setQuantity(1);
+
+        return response;
     }
 
     private List<BirdRequest> getBirdList(){
@@ -353,18 +361,18 @@ public class BirdServiceImpl implements BirdService {
     }
 
     @Override
-    public MessageResponse matchingBirdDifferentOwner(BirdRequest firstBird) {
+    public List<BirdResponse> matchingBirdDifferentOwner(BirdRequest firstBird) throws CustomException {
         if(!checkBirdInfo(firstBird)){
-            return new MessageResponse("The Bird: " + firstBird.toString() + " is not eligible for pairing");
+            throw new CustomException("The Bird: " + firstBird.toString() + " is not eligible for pairing");
         }
-        List<BirdRequest> birdlist = getBirdList();
-        List<BirdMatchingResponse> responseList = null;
+        List<BirdResponse> birdlist = findAllBird();
+        List<BirdResponse> responseList = null;
 
-        for (BirdRequest secondBird: birdlist ) {
-            if(!checkBirdInfo(secondBird)){
-                continue;
-            }
-            if(!firstBird.getTypeOfBird().equals(secondBird.getTypeOfBird())){
+        for (BirdResponse secondBird: birdlist ) {
+//            if(!checkBirdInfo(secondBird)){
+//                continue;
+//            }
+            if(!firstBird.getTypeOfBird().equals(secondBird.getTypeOfBirdID())){
                 continue;
             }
             if(firstBird.getGender() == secondBird.getGender()){
@@ -374,15 +382,45 @@ public class BirdServiceImpl implements BirdService {
             if(simulate < 50f){
                 continue;
             }
-            BirdMatchingResponse expectedResult = caculateResult(firstBird, secondBird);
-            expectedResult.setSuccessRate(simulate);
-            expectedResult.setStatus(BirdMatchingStatus.OK);
+//            BirdMatchingResponse expectedResult = caculateResult(firstBird, secondBird);
+//            expectedResult.setSuccessRate(simulate);
+//            expectedResult.setStatus(BirdMatchingStatus.OK);
             if(responseList == null){
                 responseList = new ArrayList<>();
-                responseList.add(expectedResult);
             }
+            responseList.add(secondBird);
         }
-        return new MessageResponse(responseList.toString());
+        return responseList;
+    }
+
+    @Override
+    public List<BirdResponse> matchingBirdInShop(String id) {
+        List<BirdResponse> responseList = null;
+        List<BirdResponse> birdlist = findAllBird();
+        BirdResponse firstBird = findBirdByBirdID(id);
+        for (BirdResponse secondBird: birdlist ) {
+//            if(!checkBirdInfo(secondBird)){
+//                continue;
+//            }
+            if(secondBird.getProductID().toUpperCase().equals(id.toUpperCase())){
+                continue;
+            }
+            if(!firstBird.getGender().equals(secondBird.getGender())){
+                continue;
+            }
+            if(firstBird.getTypeOfBirdID() != secondBird.getTypeOfBirdID()){
+                continue;
+            }
+            float simulate = simulateMatching(birdToNum(firstBird),birdToNum(secondBird));
+            if(simulate < 50f){
+                continue;
+            }
+            if(responseList == null){
+                responseList = new ArrayList<>();
+            }
+            responseList.add(secondBird);
+        }
+        return responseList;
     }
 
     @Override

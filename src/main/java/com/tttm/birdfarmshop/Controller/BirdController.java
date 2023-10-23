@@ -10,6 +10,7 @@ import com.tttm.birdfarmshop.Utils.Request.BirdRequest;
 import com.tttm.birdfarmshop.Utils.Request.FilterProduct;
 import com.tttm.birdfarmshop.Utils.Response.BirdResponse;
 import com.tttm.birdfarmshop.Utils.Response.MessageResponse;
+import jakarta.websocket.server.PathParam;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -78,7 +79,7 @@ public class BirdController {
     }
 
     @PostMapping(ConstantAPI.MATCHING_BIRD_FROM_SAME_OWNER)
-    public ResponseEntity<MessageResponse> matchingSameOwner(@RequestBody BirdMatchingRequest bird)
+    public ResponseEntity<BirdResponse> matchingSameOwner(@RequestBody BirdMatchingRequest bird)
         throws CustomException {
         try {
             return new ResponseEntity<>(birdService.matchingBird(bird.getFirstBird(), bird.getSecondBird()), HttpStatus.OK);
@@ -87,7 +88,7 @@ public class BirdController {
         }
     }
     @PostMapping(ConstantAPI.MATCHING_BIRD_FROM_DIFFERENT_OWNER)
-    public ResponseEntity<MessageResponse> matchingDifferentOwner(@RequestBody BirdRequest bird)
+    public ResponseEntity<List<BirdResponse>> matchingDifferentOwner(@RequestBody BirdRequest bird)
             throws CustomException {
         try {
             return new ResponseEntity<>(birdService.matchingBirdDifferentOwner(bird), HttpStatus.OK);
@@ -95,7 +96,15 @@ public class BirdController {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
     }
-
+    @GetMapping(ConstantAPI.MATCHING_BIRD_IN_SHOP)
+    public ResponseEntity<List<BirdResponse>> matchingBirdInShop(@PathParam("id") String id)
+            throws CustomException {
+        try {
+            return new ResponseEntity<>(birdService.matchingBirdInShop(id), HttpStatus.OK);
+        } catch (Exception ex) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+    }
     @PostMapping(ConstantAPI.GET_BIRD_BY_NAME + ConstantParametter.BIRD_NAME)
     public ResponseEntity<List<BirdResponse>> findBirdByName(@PathVariable("BirdName") String BirdName) throws CustomException {
         try {
