@@ -29,6 +29,7 @@ public interface UserRepository extends JpaRepository<User, Integer> {
     )
     Optional<User> findUserByEmailAndActiveStatus(String email, String accountStatus);
 
+
     @Query(
             value = " select * from user where role = ?1", nativeQuery = true
     )

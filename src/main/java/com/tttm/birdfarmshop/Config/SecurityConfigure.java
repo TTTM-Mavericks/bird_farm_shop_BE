@@ -29,6 +29,8 @@ public class SecurityConfigure {
     private final JwtAuthenticationFilter jwtAuthFilter;
     private final AuthenticationProvider authenticationProvider;
     private final LogoutHandler logoutHandler;
+    private final RestAccessDenyEntryPoint restAccessDenyEntryPoint;
+    private final RestUnauthorizedEntryPoint restUnauthorizedEntryPoint;
     private static final String[] WHITE_LIST_URL = {"/auth/**",
             "/v2/api-docs",
             "/v3/api-docs",
@@ -46,6 +48,13 @@ public class SecurityConfigure {
     SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
         httpSecurity
                 .csrf(AbstractHttpConfigurer::disable)
+
+                //Set access denied handler
+                .exceptionHandling(access -> access.accessDeniedHandler(restAccessDenyEntryPoint))
+
+                //Set unauthorized handler
+                .exceptionHandling(access -> access.authenticationEntryPoint(restUnauthorizedEntryPoint))
+                
                 .authorizeHttpRequests(
                         auth ->
                             auth.requestMatchers(WHITE_LIST_URL)
@@ -58,6 +67,7 @@ public class SecurityConfigure {
                                 .anyRequest()
                                 .permitAll()
                 )
+
 
 //                .authorizeHttpRequests((authorize) ->
 //                        authorize
