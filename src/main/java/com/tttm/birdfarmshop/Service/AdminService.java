@@ -11,6 +11,8 @@ public interface AdminService {
     List<UserResponse> getAllUsers();
 
     List<UserResponse> getAllCustomers();
+    List<UserResponse> getAllShippers();
+    List<UserResponse> getAllHealthcares();
 
     UserResponse BanUserAccount(int UserID);
 

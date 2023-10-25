@@ -7,6 +7,7 @@ import com.tttm.birdfarmshop.Exception.CustomException;
 import com.tttm.birdfarmshop.Service.CodeStorageService;
 import com.tttm.birdfarmshop.Service.MailService;
 import com.tttm.birdfarmshop.DTO.MailDTO;
+import com.tttm.birdfarmshop.Utils.Request.CancelOrderRequest;
 import com.tttm.birdfarmshop.Utils.Response.AuthenticationResponse;
 import com.tttm.birdfarmshop.Utils.Response.MessageResponse;
 import lombok.RequiredArgsConstructor;
@@ -37,4 +38,18 @@ public class EmailController {
             return new ResponseEntity<>(new MessageResponse(ex.getMessage()), HttpStatus.NOT_IMPLEMENTED);
         }
     }
+
+    @PostMapping(ConstantAPI.SEND_MAIL_CANCEL_ORDER)
+    public ResponseEntity<MessageResponse> sendMailForCancelOrder(@RequestBody CancelOrderRequest cancelOrderRequest) throws CustomException
+    {
+        try
+        {
+            return new ResponseEntity<>(mailService.sendMailForCancelOrder(cancelOrderRequest), HttpStatus.OK);
+        }
+        catch (Exception ex)
+        {
+            return new ResponseEntity<>(new MessageResponse(ex.getMessage()), HttpStatus.NOT_IMPLEMENTED);
+        }
+    }
+
 }

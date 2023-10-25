@@ -6,5 +6,7 @@ public interface ThymeleafService {
     String createContentForgotPassword(String password);
 
     String createContentVerifyAccount(String email);
+
+    String sendMailCancelOrder(String message);
 }
 

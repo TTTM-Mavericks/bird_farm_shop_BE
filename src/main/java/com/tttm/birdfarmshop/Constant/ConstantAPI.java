@@ -31,6 +31,8 @@ public class ConstantAPI {
     public static final String REFRESH_TOKEN = "/refresh-token";
     public static final String LOG_OUT = "/refresh-token";
     public static final String GET_ALL_CUSTOMERS = "/getAllCustomers";
+    public static final String GET_ALL_HEALTHCARES = "/getAllHealthcares";
+    public static final String GET_ALL_SHIPPERS = "/getAllShippers";
     public static final String GET_ALL_USERS = "/getAllUsers";
     public static final String BAN_USER_ACCOUNT = "/banUserAccount";
     public static final String UNBAN_USER_ACCOUNT = "/unBanUserAccount";
@@ -88,6 +90,7 @@ public class ConstantAPI {
     public static final String GET_ORDER_BY_ID = "/getOrderByID";
     public static final String GET_ALL_ORDER = "/getAllOrder";
     public static final String DELETE_ORDER = "/deleteOrder";
+    public static final String SEND_MAIL_CANCEL_ORDER = "/sendMailForCancelOrder";
 
     //Voucher Function
     public static final String CREATE_VOUCHER = "/createVoucher";
