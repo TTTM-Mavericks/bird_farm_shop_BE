@@ -17,7 +17,7 @@ public class ProductResponse {
 
     private String productName;
 
-    private Double price;
+    private Integer price;
 
     private String description;
 
