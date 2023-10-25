@@ -14,7 +14,7 @@ import java.util.List;
 public class FoodDTO {
     private String productName;
 
-    private Double price;
+    private Integer price;
 
     private String description;
 

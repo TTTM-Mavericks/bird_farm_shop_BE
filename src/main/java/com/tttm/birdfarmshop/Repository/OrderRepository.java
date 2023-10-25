@@ -13,4 +13,9 @@ public interface OrderRepository extends JpaRepository<Order, Integer> {
     @Modifying
     @Query(value = "delete from `order` where orderid = ?1", nativeQuery = true)
     void deleteOrderByOrderID(Integer orderID);
+
+    @Query(
+            value = " select * from `order`", nativeQuery = true
+    )
+    List<Order> getAllOrder();
 }

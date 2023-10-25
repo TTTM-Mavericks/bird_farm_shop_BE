@@ -34,38 +34,22 @@ public class AdminServiceImpl implements AdminService {
 
     @Override
     public List<UserResponse> getAllUsers() {
-         logger.info("Get All Users");
-         return userRepository.getAllUsers()
+        logger.info("Get All Users");
+        List<UserResponse> list = userRepository.getAllUsers()
                 .stream()
                 .map(this::convertToUserResponse)
                 .collect(Collectors.toList());
+        return list;
     }
 
     @Override
     public List<UserResponse> getAllCustomers() {
         logger.info("Get All Customers");
-       return userRepository.getAllUsersBasedOnRole(ERole.CUSTOMER.toString())
+        List<UserResponse> list = userRepository.getAllUsersBasedOnRole(ERole.CUSTOMER.toString())
                 .stream()
                 .map(this::convertToUserResponse)
                 .collect(Collectors.toList());
-    }
-
-    @Override
-    public List<UserResponse> getAllHealthcares() {
-        logger.info("Get All Healthcare Professionals");
-        return userRepository.getAllUsersBasedOnRole(ERole.HEALTHCAREPROFESSIONAL.name())
-                .stream()
-                .map(this::convertToUserResponse)
-                .collect(Collectors.toList());
-    }
-
-    @Override
-    public List<UserResponse> getAllShippers() {
-        logger.info("Get All Shippers");
-        return userRepository.getAllUsersBasedOnRole(ERole.SHIPPER.name())
-                .stream()
-                .map(this::convertToUserResponse)
-                .collect(Collectors.toList());
+        return list;
     }
 
     @Override

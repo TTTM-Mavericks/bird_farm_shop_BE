@@ -1,5 +1,6 @@
 package com.tttm.birdfarmshop.Utils.Response;
 
+import com.tttm.birdfarmshop.Enums.BirdColor;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -16,7 +17,7 @@ public class BirdResponse {
 
     private String productName;
 
-    private Double price;
+    private Integer price;
 
     private String description;
 
@@ -35,6 +36,9 @@ public class BirdResponse {
     private Boolean gender;
 
     private Boolean fertility;
+
+    private BirdColor birdColor;
+    private Integer breedingTimes;
 
     private String typeOfBirdID;
 
