@@ -24,8 +24,8 @@ public class OrderDetail {
   @JoinColumn(name = "orderID")
   private Order order;
 
-  public OrderDetail(Product product, Order order1) {
+  public OrderDetail(Product product, Order order) {
     this.product = product;
-    this.order = order1;
+    this.order = order;
   }
 }

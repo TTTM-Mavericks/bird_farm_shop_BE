@@ -14,9 +14,11 @@ public class Shipper {
   @Id
   @Column(name = "shipperID", unique = true, nullable = false)
   private Integer shipperID;
+
   @OneToOne
   @JoinColumn(name = "shipperID", referencedColumnName = "userID", insertable = false, updatable = false)
   private User user;
+
   public Shipper(Integer shipperID) {
     this.shipperID = shipperID;
   }
