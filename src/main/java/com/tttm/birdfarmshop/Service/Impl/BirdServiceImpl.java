@@ -1,12 +1,14 @@
 package com.tttm.birdfarmshop.Service.Impl;
 
 import com.tttm.birdfarmshop.DTO.BirdDTO;
+import com.tttm.birdfarmshop.Enums.BirdColor;
 import com.tttm.birdfarmshop.Enums.BirdMatchingStatus;
 import com.tttm.birdfarmshop.Enums.ProductStatus;
 import com.tttm.birdfarmshop.Exception.CustomException;
 import com.tttm.birdfarmshop.Models.*;
 import com.tttm.birdfarmshop.Repository.*;
 import com.tttm.birdfarmshop.Service.BirdService;
+import com.tttm.birdfarmshop.Utils.Request.BirdMatching;
 import com.tttm.birdfarmshop.Utils.Request.BirdRequest;
 import com.tttm.birdfarmshop.Utils.Request.FilterProduct;
 import com.tttm.birdfarmshop.Utils.Response.BirdMatchingResponse;
@@ -33,13 +35,14 @@ public class BirdServiceImpl implements BirdService {
     private final TypeOfBirdRepository typeOfBirdRepository;
     private final ImageRepository imageRepository;
     private final Logger logger = LoggerFactory.getLogger(BirdServiceImpl.class);
-    private boolean isValidFood(BirdDTO dto)
-    {
+
+    private boolean isValidFood(BirdDTO dto) {
         return !dto.getProductName().isBlank() && !dto.getProductName().isEmpty() && dto.getPrice() >= 0
                 && !dto.getTypeOfProduct().isEmpty() && !dto.getTypeOfProduct().isBlank() && dto.getRating() >= 0
-                && !dto.getFertility().toString().isBlank()  && !dto.getFertility().toString().isEmpty()
+                && !dto.getFertility().toString().isBlank() && !dto.getFertility().toString().isEmpty()
                 && !dto.getTypeOfBirdID().isEmpty() && !dto.getTypeOfBirdID().isBlank();
     }
+
     @Override
     public MessageResponse AddNewBird(BirdDTO dto) {
         Optional<TypeOfBird> typeOfBirdOptional = typeOfBirdRepository.findById(dto.getTypeOfBirdID());
@@ -55,27 +58,27 @@ public class BirdServiceImpl implements BirdService {
         TypeOfBird typeOfBird = typeOfBirdOptional.get();
         HealthcareProfessional healthcareProfessional = healthcareProfessionalOptional.get();
 
-         Product product = productRepository.save(
-                 Product.builder()
-                         .productID(BirdID)
-                         .productName(dto.getProductName())
-                         .price(dto.getPrice())
-                         .description(dto.getDescription())
-                         .typeOfProduct(dto.getTypeOfProduct().toUpperCase())
-                         .feedback(dto.getFeedback())
-                         .rating(dto.getRating())
-                         .productStatus(ProductStatus.AVAILABLE)
-                         .quantity(dto.getQuantity())
-                         .build()
-         );
+        Product product = productRepository.save(
+                Product.builder()
+                        .productID(BirdID)
+                        .productName(dto.getProductName())
+                        .price(dto.getPrice())
+                        .description(dto.getDescription())
+                        .typeOfProduct(dto.getTypeOfProduct().toUpperCase())
+                        .feedback(dto.getFeedback())
+                        .rating(dto.getRating())
+                        .productStatus(ProductStatus.AVAILABLE)
+                        .quantity(dto.getQuantity())
+                        .build()
+        );
 
         List<String> listImages = dto.getImages();
         listImages.forEach(
                 imageUrl -> imageRepository.save(
                         Image.builder()
-                        .imageUrl(imageUrl)
-                        .imageProduct(product)
-                        .build())
+                                .imageUrl(imageUrl)
+                                .imageProduct(product)
+                                .build())
         );
 
         birdRepository.save(
@@ -130,8 +133,7 @@ public class BirdServiceImpl implements BirdService {
                 productRepository.save(product);
 
                 List<String> listImages = dto.getImages();
-                if(listImages.size() != 0)
-                {
+                if (listImages.size() != 0) {
                     imageRepository.deleteImageByproductID(birdID);
                     listImages.forEach(
                             imageUrl -> imageRepository.save(
@@ -178,18 +180,13 @@ public class BirdServiceImpl implements BirdService {
 
     @Override
     public BirdResponse findBirdByBirdID(String birdID) {
-        try
-        {
+        try {
             Optional<Product> productOptional = productRepository.findById(birdID);
             Optional<Bird> birdOptional = birdRepository.findById(birdID);
-            if(productOptional.isPresent() && birdOptional.isPresent())
-            {
+            if (productOptional.isPresent() && birdOptional.isPresent()) {
                 return mapperedToBirdRepsonse(productOptional.get(), birdOptional.get());
-            }
-            else return new BirdResponse();
-        }
-        catch (Exception e)
-        {
+            } else return new BirdResponse();
+        } catch (Exception e) {
             return new BirdResponse();
         }
     }
@@ -198,11 +195,9 @@ public class BirdServiceImpl implements BirdService {
     public List<BirdResponse> findAllBird() {
         List<BirdResponse> BirdResponseList = new ArrayList<>();
         List<Product> productList = productRepository.findAllBird();
-        for(Product product : productList)
-        {
+        for (Product product : productList) {
             Optional<Bird> birdOptional = birdRepository.findById(product.getProductID());
-            if(birdOptional.isPresent())
-            {
+            if (birdOptional.isPresent()) {
                 BirdResponseList.add(mapperedToBirdRepsonse(product, birdOptional.get()));
             }
         }
@@ -210,47 +205,46 @@ public class BirdServiceImpl implements BirdService {
     }
 
 
-    private BirdResponse mapperedToBirdRepsonse(Product product, Bird bird)
-    {
+    private BirdResponse mapperedToBirdRepsonse(Product product, Bird bird) {
         return BirdResponse.builder()
-            .productID(product.getProductID())
-            .productName(product.getProductName())
-            .price(product.getPrice())
-            .description(product.getDescription())
-            .typeOfProduct(product.getTypeOfProduct().toUpperCase())
-            .images(
-                    imageRepository.findImageByProductID(product.getProductID())
-                            .stream()
-                            .map(Image::getImageUrl)
-                            .collect(Collectors.toList())
-            )
-            .feedback(product.getFeedback())
-            .rating(product.getRating())
-            .quantity(product.getQuantity())
-            .age(bird.getAge())
-            .gender(bird.getGender())
-            .fertility(bird.getFertility())
-            .typeOfBirdID(bird.getTypeOfBird().getTypeID())
-            .healthcareProfessionalID(bird.getHealthcareProfessional().getHealthcareID())
-            .build();
+                .productID(product.getProductID())
+                .productName(product.getProductName())
+                .price(product.getPrice())
+                .description(product.getDescription())
+                .typeOfProduct(product.getTypeOfProduct().toUpperCase())
+                .images(
+                        imageRepository.findImageByProductID(product.getProductID())
+                                .stream()
+                                .map(Image::getImageUrl)
+                                .collect(Collectors.toList())
+                )
+                .feedback(product.getFeedback())
+                .rating(product.getRating())
+                .quantity(product.getQuantity())
+                .age(bird.getAge())
+                .gender(bird.getGender())
+                .fertility(bird.getFertility())
+                .typeOfBirdID(bird.getTypeOfBird().getTypeID())
+                .healthcareProfessionalID(bird.getHealthcareProfessional().getHealthcareID())
+                .build();
 
     }
 
-    private boolean checkBirdInfo(BirdRequest bird){
-        if(bird.getBreedingTimes() >= 5){
+    private boolean checkBirdInfo(BirdMatching bird) {
+        if (bird.getBreedingTimes() >= 5) {
             return false;
         }
-        if(bird.getAge() >= 4){
+        if (bird.getAge() >= 4) {
             return false;
         }
         return true;
     }
 
-    private float simulateMatching(long firstNum, long secondNum){
-        return (float)((firstNum + secondNum)/100)%100;
+    private float simulateMatching(long firstNum, long secondNum) {
+        return (float) ((firstNum + secondNum) / 100) % 100;
     }
 
-    private <T> long birdToNum(T bird){
+    private <T> long birdToNum(T bird) {
         try {
             // Tạo một đối tượng MessageDigest với thuật toán MD5
             MessageDigest md = MessageDigest.getInstance("MD5");
@@ -267,6 +261,7 @@ public class BirdServiceImpl implements BirdService {
         }
         return 0;
     }
+
     private long bytesToLong(byte[] bytes) {
         long result = 0;
         for (int i = 0; i < bytes.length; i++) {
@@ -275,117 +270,152 @@ public class BirdServiceImpl implements BirdService {
         return Math.abs(result); // Đảm bảo kết quả là số dương
     }
 
-    private String getSizeOfBird(long num){
-        if(num <= 33333){
+    private String getSizeOfBird(long num) {
+        if (num <= 33333) {
             return "S";
         }
-        if(num <= 66666){
+        if (num <= 66666) {
             return "M";
         }
         return "L";
     }
 
-    private BirdMatchingResponse caculateResult(BirdRequest firstBird, BirdRequest seconBird){
-        BirdMatchingResponse response = new BirdMatchingResponse();
-        if(birdToNum(firstBird) >= birdToNum(seconBird)){
-            response.setColor(firstBird.getColor());
-            response.setSize(getSizeOfBird(birdToNum(firstBird)));
+    private BirdColor caculateResult(BirdMatching firstBird, BirdMatching seconBird) {
+        if (birdToNum(firstBird) >= birdToNum(seconBird)) {
+            return firstBird.getBirdColor();
         } else {
-            response.setColor(seconBird.getColor());
-            response.setSize(getSizeOfBird(birdToNum(seconBird)));
+            return seconBird.getBirdColor();
         }
-        return response;
     }
 
     @Override
-    public BirdResponse matchingBird(BirdRequest firstBird, BirdRequest secondBird) throws CustomException {
-        if(!checkBirdInfo(firstBird)){
+    public BirdMatchingResponse matchingSameOwner(BirdMatching firstBird, BirdMatching secondBird) throws CustomException {
+        if (!checkBirdInfo(firstBird)) {
             throw new CustomException("The Bird: " + firstBird.toString() + " is not eligible for pairing");
         }
-        if(!checkBirdInfo(secondBird)){
+        if (!checkBirdInfo(secondBird)) {
             throw new CustomException("The Bird: " + secondBird.toString() + " is not eligible for pairing");
         }
-        if(!firstBird.getTypeOfBird().equals(secondBird.getTypeOfBird())){
+
+        if (!firstBird.getTypeOfBirdID().equals(secondBird.getTypeOfBirdID())) {
             throw new CustomException("This pare can not matching. Different type.");
         }
-        if(firstBird.getGender() == secondBird.getGender()){
+
+        TypeOfBird tb = typeOfBirdRepository.findById(firstBird.getTypeOfBirdID()).map(type -> {
+                    return type;
+                })
+                .orElse(null);
+        if(tb == null){
+            throw new CustomException("Invalid Type of Bird");
+        }
+
+        if (firstBird.getGender() == secondBird.getGender()) {
             throw new CustomException("This pare can not matching. The same gender.");
         }
 //        System.out.println(birdToNum(firstBird));
 //        System.out.println(birdToNum(secondBird));
-        float simulate = simulateMatching(birdToNum(firstBird),birdToNum(secondBird));
-        if(simulate < 50f){
+        float simulate = simulateMatching(birdToNum(firstBird), birdToNum(secondBird));
+        if (simulate < 50f) {
             throw new CustomException("The success rate is not good: " + simulate);
         }
-        BirdMatchingResponse expectedResult = caculateResult(firstBird, secondBird);
-        expectedResult.setSuccessRate(simulate);
-        expectedResult.setStatus(BirdMatchingStatus.OK);
-
-        BirdResponse response = new BirdResponse();
-        response.setAge(0);
         Random random = new Random();
-        response.setGender(random.nextBoolean());
-        response.setDescription("New Baby Bird");
-        response.setFertility(true);
-        response.setTypeOfBirdID(firstBird.getTypeOfBird());
-        response.setQuantity(1);
+        Bird expectedResult = new Bird().builder()
+                .breedingTimes(0)
+                .typeOfBird(tb)
+                .gender(random.nextBoolean())
+                .age(0)
+                .fertility(true)
+                .status(true)
+                .color(caculateResult(firstBird, secondBird))
+                .build();
 
-        return response;
+        BirdMatchingResponse birdResponse = new BirdMatchingResponse(expectedResult, simulate);
+
+        return birdResponse;
     }
 
-    private List<BirdRequest> getBirdList(){
+    private List<BirdRequest> getBirdList() {
         List<Bird> productList = birdRepository.findAll();
         List<BirdRequest> birdRequestList = null;
         for (Bird bird : productList) {
-            if(birdRequestList == null){
+            if (birdRequestList == null) {
                 birdRequestList = new ArrayList<>();
             }
             birdRequestList.add(
                     BirdRequest.builder()
-                    .birdName(bird.getProduct().getProductName())
-                    .typeOfBird(bird.getTypeOfBird().toString())
-                    .description(bird.getProduct().getDescription())
-                    .age(bird.getAge())
-                    .gender(bird.getGender())
-                    .breedingTimes(bird.getBreedingTimes())
-                    .color(bird.getColor())
-                    .images(
-                            imageRepository.findImageByProductID(bird.getBirdID())
-                                    .stream()
-                                    .map(Image::getImageUrl)
-                                    .collect(Collectors.toList())
-                    )
-                    .build());
+                            .birdName(bird.getProduct().getProductName())
+                            .typeOfBird(bird.getTypeOfBird().toString())
+                            .description(bird.getProduct().getDescription())
+                            .age(bird.getAge())
+                            .gender(bird.getGender())
+                            .breedingTimes(bird.getBreedingTimes())
+                            .color(bird.getColor())
+                            .images(
+                                    imageRepository.findImageByProductID(bird.getBirdID())
+                                            .stream()
+                                            .map(Image::getImageUrl)
+                                            .collect(Collectors.toList())
+                            )
+                            .build());
         }
         return birdRequestList;
     }
 
     @Override
-    public List<BirdResponse> matchingBirdDifferentOwner(BirdRequest firstBird) throws CustomException {
-        if(!checkBirdInfo(firstBird)){
+    public List<BirdResponse> matchingBirdDifferentOwner(BirdMatching firstBird) throws CustomException {
+        if (!checkBirdInfo(firstBird)) {
             throw new CustomException("The Bird: " + firstBird.toString() + " is not eligible for pairing");
         }
         List<BirdResponse> birdlist = findAllBird();
         List<BirdResponse> responseList = null;
+        TypeOfBird tb = typeOfBirdRepository.findById(firstBird.getTypeOfBirdID()).map(type -> {
+                    return type;
+                })
+                .orElse(null);
+        if(tb == null){
+            throw new CustomException("Invalid Type of Bird");
+        }
 
-        for (BirdResponse secondBird: birdlist ) {
+        for (BirdResponse secondBird : birdlist) {
 //            if(!checkBirdInfo(secondBird)){
 //                continue;
 //            }
-            if(!firstBird.getTypeOfBird().equals(secondBird.getTypeOfBirdID())){
+            if (!firstBird.getTypeOfBirdID().equals(secondBird.getTypeOfBirdID())) {
                 continue;
             }
-            if(firstBird.getGender() == secondBird.getGender()){
+            if (firstBird.getGender() == secondBird.getGender()) {
                 continue;
             }
-            float simulate = simulateMatching(birdToNum(firstBird),birdToNum(secondBird));
-            if(simulate < 50f){
+            float simulate = simulateMatching(birdToNum(firstBird), birdToNum(secondBird));
+            if (simulate < 50f) {
                 continue;
             }
-//            BirdMatchingResponse expectedResult = caculateResult(firstBird, secondBird);
-//            expectedResult.setSuccessRate(simulate);
-//            expectedResult.setStatus(BirdMatchingStatus.OK);
-            if(responseList == null){
+            if (!firstBird.getTypeOfBirdID().equals(secondBird.getTypeOfBirdID())) {
+                throw new CustomException("This pare can not matching. Different type.");
+            }
+//            BirdMatching second = new BirdMatching()
+//                    .builder()
+//                    .birdColor(secondBird.getBirdColor())
+//                    .age(secondBird.getAge())
+//                    .breedingTimes(secondBird.getBreedingTimes())
+//                    .typeOfBirdID(secondBird.getTypeOfBirdID())
+//                    .productName(secondBird.getProductName())
+//                    .price(secondBird.getPrice())
+//                    .description(secondBird.getDescription())
+//                    .fertility(secondBird.getFertility())
+//                    .gender(secondBird.getGender())
+//                    .images(secondBird.getImages())
+//                    .build();
+//            Random random = new Random();
+//            BirdResponse expectedResult = new BirdResponse().builder()
+//                    .breedingTimes(0)
+//                    .typeOfBirdID(tb.getTypeID())
+//                    .gender(random.nextBoolean())
+//                    .age(0)
+//                    .fertility(true)
+//                    .birdColor(caculateResult(firstBird, second))
+//                    .build();
+            if (responseList == null) {
                 responseList = new ArrayList<>();
             }
             responseList.add(secondBird);
@@ -398,24 +428,24 @@ public class BirdServiceImpl implements BirdService {
         List<BirdResponse> responseList = null;
         List<BirdResponse> birdlist = findAllBird();
         BirdResponse firstBird = findBirdByBirdID(id);
-        for (BirdResponse secondBird: birdlist ) {
+        for (BirdResponse secondBird : birdlist) {
 //            if(!checkBirdInfo(secondBird)){
 //                continue;
 //            }
-            if(secondBird.getProductID().toUpperCase().equals(id.toUpperCase())){
+            if (secondBird.getProductID().toUpperCase().equals(id.toUpperCase())) {
                 continue;
             }
-            if(!firstBird.getGender().equals(secondBird.getGender())){
+            if (!firstBird.getGender().equals(secondBird.getGender())) {
                 continue;
             }
-            if(firstBird.getTypeOfBirdID() != secondBird.getTypeOfBirdID()){
+            if (firstBird.getTypeOfBirdID() != secondBird.getTypeOfBirdID()) {
                 continue;
             }
-            float simulate = simulateMatching(birdToNum(firstBird),birdToNum(secondBird));
-            if(simulate < 50f){
+            float simulate = simulateMatching(birdToNum(firstBird), birdToNum(secondBird));
+            if (simulate < 50f) {
                 continue;
             }
-            if(responseList == null){
+            if (responseList == null) {
                 responseList = new ArrayList<>();
             }
             responseList.add(secondBird);
@@ -488,8 +518,7 @@ public class BirdServiceImpl implements BirdService {
                 .collect(Collectors.toList());
     }
 
-    private List<Product> getListProductByAge(List<Product> products, int left_range_age, int right_range_age)
-    {
+    private List<Product> getListProductByAge(List<Product> products, int left_range_age, int right_range_age) {
         return products.stream()
                 .filter(product -> birdRepository.findById(product.getProductID())
                         .map(Bird::getAge)
@@ -499,8 +528,7 @@ public class BirdServiceImpl implements BirdService {
                 .collect(Collectors.toList());
     }
 
-    private List<Product> getListProductByGender(List<Product> products, boolean gender)
-    {
+    private List<Product> getListProductByGender(List<Product> products, boolean gender) {
         return products.stream()
                 .filter(product -> birdRepository.findById(product.getProductID())
                         .map(Bird::getGender)
@@ -510,8 +538,7 @@ public class BirdServiceImpl implements BirdService {
                 .collect(Collectors.toList());
     }
 
-    private List<Product> getListProductByFertility(List<Product> products, boolean fertility)
-    {
+    private List<Product> getListProductByFertility(List<Product> products, boolean fertility) {
         return products.stream()
                 .filter(product -> birdRepository.findById(product.getProductID())
                         .map(Bird::getFertility)
@@ -521,8 +548,7 @@ public class BirdServiceImpl implements BirdService {
                 .collect(Collectors.toList());
     }
 
-    private List<Product> getListProductByTypeOfBirdName(List<Product> products, String TypeOfBirdName)
-    {
+    private List<Product> getListProductByTypeOfBirdName(List<Product> products, String TypeOfBirdName) {
         return products.stream()
                 .filter(product -> birdRepository.findById(product.getProductID())
                         .map(bird -> typeOfBirdRepository.findTypeOfBirdByBirdId(bird.getBirdID()))
@@ -541,8 +567,7 @@ public class BirdServiceImpl implements BirdService {
                 .collect(Collectors.toList());
     }
 
-    private List<Product> getListProductByColor(List<Product> products, String color)
-    {
+    private List<Product> getListProductByColor(List<Product> products, String color) {
         return products.stream()
                 .filter(product -> birdRepository.findById(product.getProductID())
                         .map(Bird::getColor)
@@ -558,40 +583,34 @@ public class BirdServiceImpl implements BirdService {
         List<Product> products = productRepository.findAll();
         logger.info("Inside Initial Filter Bird: " + products.size());
 
-        if(!filterProduct.getLeft_range_age().isEmpty() && !filterProduct.getLeft_range_age().isBlank()
-                && !filterProduct.getRight_range_age().isEmpty() && !filterProduct.getRight_range_age().isBlank())
-        {
+        if (!filterProduct.getLeft_range_age().isEmpty() && !filterProduct.getLeft_range_age().isBlank()
+                && !filterProduct.getRight_range_age().isEmpty() && !filterProduct.getRight_range_age().isBlank()) {
             products = getListProductByAge(products, Integer.parseInt(filterProduct.getLeft_range_age()), Integer.parseInt(filterProduct.getRight_range_age()));
             logger.info("Inside Check Age Filter Bird: " + products.size());
         }
 
-        if(!filterProduct.getGender().isEmpty() && !filterProduct.getGender().isBlank())
-        {
+        if (!filterProduct.getGender().isEmpty() && !filterProduct.getGender().isBlank()) {
             products = getListProductByGender(products, Boolean.parseBoolean(filterProduct.getGender()));
             logger.info("Inside Check Gender Filter Bird: " + products.size());
         }
 
-        if(!filterProduct.getFertility().isBlank() && !filterProduct.getFertility().isEmpty())
-        {
+        if (!filterProduct.getFertility().isBlank() && !filterProduct.getFertility().isEmpty()) {
             products = getListProductByFertility(products, Boolean.parseBoolean(filterProduct.getFertility()));
             logger.info("Inside Check Fertility Filter Bird: " + products.size());
         }
 
-        if(!filterProduct.getTypeOfBirdName().isEmpty() && !filterProduct.getTypeOfBirdName().isBlank())
-        {
+        if (!filterProduct.getTypeOfBirdName().isEmpty() && !filterProduct.getTypeOfBirdName().isBlank()) {
             products = getListProductByTypeOfBirdName(products, filterProduct.getTypeOfBirdName());
             logger.info("Inside Check TypeOfBirdName Filter Bird: " + products.size());
         }
 
-        if(!filterProduct.getLeft_range_price().isEmpty() && !filterProduct.getLeft_range_price().isBlank()
-                && !filterProduct.getRight_range_price().isEmpty() && !filterProduct.getRight_range_price().isBlank())
-        {
+        if (!filterProduct.getLeft_range_price().isEmpty() && !filterProduct.getLeft_range_price().isBlank()
+                && !filterProduct.getRight_range_price().isEmpty() && !filterProduct.getRight_range_price().isBlank()) {
             products = getListProductByPrice(products, Double.parseDouble(filterProduct.getLeft_range_price()), Double.parseDouble(filterProduct.getRight_range_price()));
             logger.info("Inside Check Price Filter Bird: " + products.size());
         }
 
-        if(!filterProduct.getColor().isEmpty() && !filterProduct.getColor().isBlank())
-        {
+        if (!filterProduct.getColor().isEmpty() && !filterProduct.getColor().isBlank()) {
             products = getListProductByColor(products, filterProduct.getColor());
             logger.info("Inside Check Color Filter Bird: " + products.size());
         }

@@ -2,14 +2,11 @@ package com.tttm.birdfarmshop.Service.Impl;
 
 
 import com.tttm.birdfarmshop.Enums.AccountStatus;
-import com.tttm.birdfarmshop.Models.Order;
 import com.tttm.birdfarmshop.Models.User;
-import com.tttm.birdfarmshop.Repository.OrderRepository;
 import com.tttm.birdfarmshop.Repository.UserRepository;
 import com.tttm.birdfarmshop.Service.JwtService;
 import com.tttm.birdfarmshop.Service.MailService;
 import com.tttm.birdfarmshop.Service.ThymeleafService;
-import com.tttm.birdfarmshop.Utils.Request.CancelOrderRequest;
 import com.tttm.birdfarmshop.Utils.Response.AuthenticationResponse;
 import com.tttm.birdfarmshop.Utils.Response.MessageResponse;
 import jakarta.mail.internet.MimeMessage;
@@ -23,13 +20,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.nio.charset.StandardCharsets;
-import java.text.SimpleDateFormat;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.util.Date;
-import java.util.Optional;
 import java.util.Random;
-import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -44,8 +35,6 @@ public class MailServiceImpl implements MailService {
     private final UserRepository userRepository;
 
     private final ThymeleafService thymeleafService;
-
-    private final OrderRepository orderRepository;
 
     private final JwtService jwtService;
     private static final Logger logger = LoggerFactory.getLogger(MailServiceImpl.class);
@@ -85,8 +74,6 @@ public class MailServiceImpl implements MailService {
         }
     }
 
-
-
     @Override
     public String SendCode(String Email) {
 
@@ -119,53 +106,6 @@ public class MailServiceImpl implements MailService {
             return new MessageResponse("Success");
         }
         return new MessageResponse("Fail to Access Forgot Password");
-    }
-
-    @Override
-    public MessageResponse sendMailForCancelOrder(CancelOrderRequest cancelOrderRequest) {
-        Optional<User> user = userRepository.findById(cancelOrderRequest.getCustomerId());
-        Optional<Order> order = orderRepository.findById(cancelOrderRequest.getOrderID());
-
-        LocalDateTime localDateTime = LocalDateTime.now();
-        Date systemDate = Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant());
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd-MM-yyyy");
-        String currentDateString = simpleDateFormat.format(systemDate);
-
-        if(order.isEmpty() || user.isEmpty()) return new MessageResponse("Fail to send Mail for Cancel Order");
-
-        String email_to = cancelOrderRequest.getEmail();
-        String email_subject = "Customer Cancel Order";
-        String message = "Customer Email : " + email_to +  " already cancel your Order with Order ID: " + order.get().getOrderID() + " at " + currentDateString;
-
-        logger.info("Inside CancelOrder EmailServiceImpl with message: " + message);
-
-        sendMailCancelOrder(email_to, email_subject, message);
-
-        return new MessageResponse("Success");
-    }
-
-    private void sendMailCancelOrder(String email_to, String email_subject, String msg) {
-        try{
-
-            MimeMessage message = javaMailSender.createMimeMessage();
-
-            MimeMessageHelper helper = new MimeMessageHelper(
-                    message,
-                    MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED,
-                    StandardCharsets.UTF_8.name()
-            );
-
-            helper.setFrom(email);
-            helper.setTo(email_to);
-            helper.setSubject(email_subject);
-            helper.setText(thymeleafService.sendMailCancelOrder(msg), true);
-            logger.info("Inside CancelOrder EmailServiceImpl Method");
-            javaMailSender.send(message);
-        }
-        catch(Exception e)
-        {
-            e.printStackTrace();
-        }
     }
     private void sendCodeToMail(String email_to, String email_subject, String code) {
         try{

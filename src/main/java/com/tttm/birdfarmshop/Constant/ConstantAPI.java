@@ -86,6 +86,7 @@ public class ConstantAPI {
 
     //Order Function
     public static final String CREATE_ORDER = "/createOrder";
+    public static final String UPDATE_PAYMENT_STATUS = "/updatePaymentStatus";
     public static final String GET_ORDER_BY_ID = "/getOrderByID";
     public static final String GET_ALL_ORDER = "/getAllOrder";
     public static final String DELETE_ORDER = "/deleteOrder";
@@ -102,4 +103,11 @@ public class ConstantAPI {
     public static final String SORT_VOUCHER_BY_PRICE_DESC = "/sortVoucherByPriceDescending";
     public static final String SORT_VOUCHER_BY_ALPHABET_ASC = "/sortVoucherByAlphabetAscending";
     public static final String SORT_VOUCHER_BY_ALPHABET_DESC = "/sortVoucherByAlphabetDescending";
+
+    //Invoice Function
+    public static final String INVOICE = "/invoice";
+    public static final String CREATE_INVOICE = "/createInvoice";
+    public static final String GET_INVOICE_BY_ID = "/getVoucherByID";
+    public static final String GET_ALL_INVOICE = "/getAllVoucher";
+    public static final String UPDATE_INVOICE = "/updateVoucher";
 }
