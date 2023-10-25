@@ -18,7 +18,7 @@ public class Image {
     @Column(name = "imageID", nullable = false, unique = true)
     private Integer imageID;
 
-    @Column(name = "imageUrl", nullable = false, unique = false,  columnDefinition = "NVARCHAR(255)")
+    @Column(name = "imageUrl", nullable = true, unique = false,  columnDefinition = "NVARCHAR(255)")
     private String imageUrl;
 
     @ManyToOne
