@@ -83,9 +83,10 @@ public class Utils {
     String description = data.getDescription();
     String orderCode = Integer.toString(data.getOrderCode());
     String returnUrl = data.getReturnUrl();
-
     String dataStr = "amount=" + amount + "&cancelUrl=" + cancelUrl + "&description=" + description
         + "&orderCode=" + orderCode + "&returnUrl=" + returnUrl;
+//    String dataStr = "amount=" + amount + "&description=" + description
+//        + "&orderCode=" + orderCode;
     // Sử dụng HMAC-SHA-256 để tính toán chữ ký
     return generateHmacSHA256(dataStr, key);
   }

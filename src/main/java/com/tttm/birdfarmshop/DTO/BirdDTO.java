@@ -12,7 +12,7 @@ import java.util.List;
 public class BirdDTO {
     private String productName;
 
-    private Double price;
+    private Integer price;
 
     private String description;
 

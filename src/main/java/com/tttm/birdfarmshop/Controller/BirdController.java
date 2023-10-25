@@ -1,13 +1,18 @@
 package com.tttm.birdfarmshop.Controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.tttm.birdfarmshop.Constant.ConstantAPI;
 import com.tttm.birdfarmshop.Constant.ConstantParametter;
 import com.tttm.birdfarmshop.DTO.BirdDTO;
 import com.tttm.birdfarmshop.Exception.CustomException;
+import com.tttm.birdfarmshop.Models.Bird;
 import com.tttm.birdfarmshop.Service.BirdService;
+import com.tttm.birdfarmshop.Utils.Request.BirdMatching;
 import com.tttm.birdfarmshop.Utils.Request.BirdMatchingRequest;
 import com.tttm.birdfarmshop.Utils.Request.BirdRequest;
 import com.tttm.birdfarmshop.Utils.Request.FilterProduct;
+import com.tttm.birdfarmshop.Utils.Response.BirdMatchingResponse;
 import com.tttm.birdfarmshop.Utils.Response.BirdResponse;
 import com.tttm.birdfarmshop.Utils.Response.MessageResponse;
 import jakarta.websocket.server.PathParam;
@@ -79,16 +84,32 @@ public class BirdController {
     }
 
     @PostMapping(ConstantAPI.MATCHING_BIRD_FROM_SAME_OWNER)
-    public ResponseEntity<BirdResponse> matchingSameOwner(@RequestBody BirdMatchingRequest bird)
+    public ObjectNode matchingSameOwner(@RequestBody BirdMatchingRequest bird)
         throws CustomException {
+        ObjectMapper objectMapper = new ObjectMapper();
         try {
-            return new ResponseEntity<>(birdService.matchingBird(bird.getFirstBird(), bird.getSecondBird()), HttpStatus.OK);
+            BirdMatchingResponse birdChild = birdService.matchingSameOwner(bird.getFirstBird(), bird.getSecondBird());
+            ObjectNode respon = objectMapper.createObjectNode();
+            respon.put("success", 200);
+            respon.put("message", "Matching Bird Successfully!");
+            respon.set("data", objectMapper.createObjectNode()
+                    .put("successRate", String.valueOf(birdChild.getSuccessRate()))
+                    .put("birdType", birdChild.getBird().getTypeOfBird().getTypeName())
+                    .put("birdGender", birdChild.getBird().getGender())
+                    .put("birdColor", birdChild.getBird().getColor().name())
+            );
+            return respon;
+
         } catch (Exception ex) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            ObjectNode respon = objectMapper.createObjectNode();
+            respon.put("error", -1);
+            respon.put("message", ex.getMessage());
+            respon.set("data", null);
+            return respon;
         }
     }
     @PostMapping(ConstantAPI.MATCHING_BIRD_FROM_DIFFERENT_OWNER)
-    public ResponseEntity<List<BirdResponse>> matchingDifferentOwner(@RequestBody BirdRequest bird)
+    public ResponseEntity<List<BirdResponse>> matchingDifferentOwner(@RequestBody BirdMatching bird)
             throws CustomException {
         try {
             return new ResponseEntity<>(birdService.matchingBirdDifferentOwner(bird), HttpStatus.OK);
