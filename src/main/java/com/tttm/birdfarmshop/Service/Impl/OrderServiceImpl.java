@@ -1,33 +1,21 @@
 package com.tttm.birdfarmshop.Service.Impl;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.tttm.birdfarmshop.Enums.AccountStatus;
 import com.tttm.birdfarmshop.Enums.OrderStatus;
 import com.tttm.birdfarmshop.Enums.ProductStatus;
 import com.tttm.birdfarmshop.Enums.VoucherStatus;
-import com.tttm.birdfarmshop.Exception.CustomException;
 import com.tttm.birdfarmshop.Models.*;
 import com.tttm.birdfarmshop.Repository.*;
 import com.tttm.birdfarmshop.Service.OrderService;
-import com.tttm.birdfarmshop.Utils.Body;
 import com.tttm.birdfarmshop.Utils.Request.OrderRequest;
 import com.tttm.birdfarmshop.Utils.Response.MessageResponse;
 import com.tttm.birdfarmshop.Utils.Response.OrderResponse;
 import com.tttm.birdfarmshop.Utils.Response.ProductResponse;
-import com.tttm.birdfarmshop.Utils.Utils;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
-import org.springframework.web.reactive.function.BodyInserters;
-import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.publisher.Mono;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -40,15 +28,6 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class OrderServiceImpl implements OrderService {
-    @Value("${PAYOS_CREATE_PAYMENT_LINK_URL}")
-    private String createPaymentLinkUrl;
-    @Value("${PAYOS_CLIENT_ID}")
-    private String clientId;
-    @Value("${PAYOS_API_KEY}")
-    private String apiKey;
-    @Value("${PAYOS_CHECKSUM_KEY}")
-    private String checksumKey;
-
     private final OrderRepository orderRepository;
     private final OrderDetailRepository orderDetailRepository;
     private final ProductRepository productRepository;
@@ -58,67 +37,72 @@ public class OrderServiceImpl implements OrderService {
     private final VoucherRepository voucherRepository;
     private final ImageRepository imageRepository;
     private final UserRepository userRepository;
+    private Lock lock = new ReentrantLock();
+    private final Logger logger = LoggerFactory.getLogger(OrderServiceImpl.class);
 
+    private boolean isValidInformation(OrderRequest orderRequest)
+    {
+        return !orderRequest.getCustomerEmail().isBlank() && !orderRequest.getCustomerEmail().isEmpty() &&
+                !orderRequest.getCustomerName().isBlank() && !orderRequest.getCustomerName().isEmpty() &&
+                !orderRequest.getCustomerAddress().isBlank() && !orderRequest.getCustomerAddress().isEmpty() &&
+                !orderRequest.getCustomerPhone().isBlank() && !orderRequest.getCustomerPhone().isEmpty() &&
+                orderRequest.getListProduct().size() >= 1;
+
+    }
+
+    @Transactional
     @Override
-    public ObjectNode CreateOrder(OrderRequest order) {
-        ObjectMapper objectMapper = new ObjectMapper();
-        try{
-            final Integer customerID = order.getCustomerID();
-            String customerPhone = order.getCustomerPhone();
-            String customerName = order.getCustomerName();
-            String customerEmail = order.getCustomerEmail();
-            String customerAddress = order.getCustomerAddress();
-            final String description = order.getDescription();
-            final List<String> listProduct = order.getListProduct();  // Store List of Product ID
-            final List<String> listVoucher = order.getVoucherList();  // List of Voucher ID
-
-            Optional<Customer> customer = customerRepository.findById(customerID);
-            Optional<User> user = userRepository.findById(customerID);
-            if(customer == null || user.get().getAccountStatus() == AccountStatus.INACTIVE){
-                throw new CustomException("Customer ID is Invalid or Your Account is banned");
+    public OrderResponse createOrder(OrderRequest orderRequest) {
+        try
+        {
+            lock.lock();
+            Optional<Customer> customer = customerRepository.findById(orderRequest.getCustomerID()); // // Check Product ID is existed or not
+            Optional<User> user =  userRepository.findById(orderRequest.getCustomerID());
+            if(customer.isEmpty() || !isValidInformation(orderRequest) || user.get().getAccountStatus() == AccountStatus.INACTIVE) // Check validation fields
+            {
+                logger.info("Customer ID, Order Information is Invalid or Your Account is banned");
+                return new OrderResponse();
             }
 
-            if(customerPhone.trim().isBlank() || customerPhone.trim().isEmpty()){
-                customerPhone = user.get().getPhone();
-            }
-            if(customerName.trim().isBlank() || customerName.trim().isEmpty()){
-                customerName = user.get().getFirstName() + user.get().getLastName();
-            }
-            if(customerEmail.trim().isBlank() || customerEmail.trim().isEmpty()){
-                customerEmail = user.get().getEmail();
-            }
-            if(customerAddress.trim().isBlank() || customerAddress.trim().isEmpty()){
-                customerAddress = user.get().getAddress();
-            }
-
-            int orderAmount = 0;
+            float orderAmount = 0;
+            List<String> listProductID = orderRequest.getListProduct();
             List<Product> productList = new ArrayList<>();
-            for(String productID : listProduct)  // Check Product ID is existed or not
+            for(String productID : listProductID)  // Check Product ID is existed or not
             {
                 Optional<Product> productOptional = productRepository.findById(productID);
                 if (productOptional.isEmpty()) {
-                    throw new CustomException("Product ID is Unavailable or out of stock");
+                    logger.info("Product ID is not existed");
+                    return new OrderResponse();
                 }
                 Product product = productOptional.get();
                 if (product.getProductStatus() == ProductStatus.UNAVAILABLE || product.getQuantity() <= 0) {
-                    throw new CustomException("Product ID is Unavailable or out of stock");
+                    logger.info("Product ID is Unavailable or out of stock");
+                    return new OrderResponse();
                 }
                 productList.add(product);
                 orderAmount += product.getPrice();
             }
 
+            // Apply Voucher to the Order
             List<Voucher> voucherList = new ArrayList<>();
-            for(String voucherID : listVoucher)
+            List<String> voucherStringList = orderRequest.getVoucherList();
+            for(String voucherID : voucherStringList)
             {
                 Optional<Voucher> voucher = voucherRepository.findById(Integer.parseInt(voucherID));
-                if(voucher.isEmpty() || voucher.get().getVoucherStatus().equals(VoucherStatus.UNAVAILABLE)){
-                    throw new CustomException("Voucher ID is not existed to apply voucher");
+                if(voucher.isEmpty() || voucher.get().getVoucherStatus().equals(VoucherStatus.UNAVAILABLE))
+                {
+                    logger.info("Voucher ID is not existed to apply voucher");
+                    return new OrderResponse();
                 }
-                else{
+                else // Apply Voucher to Order
+                {
                     orderAmount -= voucher.get().getValue();
                     voucherList.add(voucher.get());
                 }
             }
+
+            LocalDateTime currentTime = LocalDateTime.now(); // Get Current Time when Order Product
+            Date orderDate = Date.from(currentTime.atZone(ZoneId.systemDefault()).toInstant());
 
             // Choose random shipper to take care the Order
             List<Shipper> shipperList = shipperRepository.findAll();
@@ -126,76 +110,25 @@ public class OrderServiceImpl implements OrderService {
             int randomShipperIndex = random.nextInt(shipperList.size());
             Shipper shipper = shipperList.get(randomShipperIndex);
 
-            String currentTimeString = String.valueOf(String.valueOf(new Date().getTime()));
-            int orderCode =
-                    Integer.parseInt(currentTimeString.substring(currentTimeString.length() - 6));
-            ObjectNode item = objectMapper.createObjectNode();
-            item.put("customerID", customerID);
-            item.put("customerPhone", customerPhone);
-            item.put("customerName", customerName);
-            item.put("customerEmail", customerEmail);
-            item.put("customerAddress", customerAddress);
-            item.put("description", description);
-            item.put("listProduct", Arrays.toString(listProduct.toArray()));
-            item.put("voucherList", Arrays.toString(listVoucher.toArray()));
-            item.put("price", orderAmount);
-
             orderRepository.save(
                     Order.builder()
-                            .customer(customer.get())
-                            .customerPhone(customerPhone)
-                            .customerName(customerName)
-                            .customerEmail(customerEmail)
-                            .customerAddress(customerAddress)
-                            .status(OrderStatus.PENDING.name())
-                            .items(listProduct.toString())
+                            .customerPhone(orderRequest.getCustomerPhone())
+                            .customerName(orderRequest.getCustomerName())
+                            .customerEmail(orderRequest.getCustomerEmail())
+                            .customerAddress(orderRequest.getCustomerAddress())
+                            .note(orderRequest.getNote())
+                            .status(OrderStatus.PENDING)
                             .amount(orderAmount)
-                            .description(description)
-                            .payment_link("checkoutUrl")
+                            .orderDate(orderDate)
+                            .customer(customer.get())
                             .shipper(shipper)
                             .build()
             );
 
-            List<Order> orderList = orderRepository.getAllOrder();
+            // Get the newest Order then Add Order to OrderDetail
+            List<Order> orders = orderRepository.findAll();
             int size = orderRepository.findAll().size();
-            Order newestOrder = orderList.get(size - 1);
-
-            List<ObjectNode> items = List.of(item);
-            Body body = new Body(orderCode, orderAmount, description, items, "", "", "");
-            String returnUrl = "https://localhost:6969/order/updatePaymentStatus/" + newestOrder.getId();
-            body.setReturnUrl("");
-            body.setCancelUrl("");
-            String bodyToSignature = Utils.createSignatureOfPaymentRequest(body, checksumKey);
-            body.setSignature(bodyToSignature);
-            // Tạo header
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.APPLICATION_JSON);
-            headers.set("x-client-id", clientId);
-            headers.set("x-api-key", apiKey);
-            // Gửi yêu cầu POST
-            WebClient client = WebClient.create();
-            Mono<String> response = client.post()
-                    .uri(createPaymentLinkUrl)
-                    .headers(httpHeaders -> httpHeaders.putAll(headers))
-                    .body(BodyInserters.fromValue(body))
-                    .retrieve()
-                    .bodyToMono(String.class);
-            String responseBody = response.block();
-            JsonNode res = objectMapper.readTree(responseBody);
-            System.out.println(res);
-            if (!Objects.equals(res.get("code").asText(), "00")) {
-                orderRepository.deleteOrderByOrderID(newestOrder.getId());
-                throw new Exception("Fail");
-            }
-            String checkoutUrl = res.get("data").get("checkoutUrl").asText();
-
-            //Kiểm tra dữ liệu có đúng không
-            String paymentLinkResSignature = Utils.createSignatureFromObj(res.get("data"), checksumKey);
-            System.out.println(paymentLinkResSignature);
-            if (!paymentLinkResSignature.equals(res.get("signature").asText())) {
-                orderRepository.deleteOrderByOrderID(newestOrder.getId());
-                throw new Exception("Signature is not compatible");
-            }
+            Order newestOrder = orders.get(size - 1);
 
             productList.forEach(product ->
                     {
@@ -209,52 +142,24 @@ public class OrderServiceImpl implements OrderService {
             voucherList.forEach(voucher -> {
                 orderVoucherRepository.save(new OrderVoucher(newestOrder, voucher));
             });
-            ObjectNode respon = objectMapper.createObjectNode();
-            respon.put("error", 0);
-            respon.put("message", "success");
-            respon.set("data", objectMapper.createObjectNode()
-                    .put("checkoutUrl", checkoutUrl)
-                    .put("returnUrl", returnUrl)
-                    .put("orderCode", newestOrder.getId())
-            );
-            return respon;
 
-        }catch (Exception ex){
-            ex.printStackTrace();
-            ObjectNode respon = objectMapper.createObjectNode();
-            respon.put("error", -1);
-            respon.put("message", ex.getMessage());
-            respon.set("data", null);
-            return respon;
+            return createOrderResponse(newestOrder, productList);
         }
-    }
-
-    @Override
-    public ObjectNode updatePaymentForOrder(int orderId) {
-        ObjectMapper objectMapper = new ObjectMapper();
-        try{
-            Order order = orderRepository.getReferenceById(orderId);
-            order.setStatus(OrderStatus.COMPLETED.name());
-            orderRepository.save(order);
-            ObjectNode respon = objectMapper.createObjectNode();
-            respon.put("success", 200);
-            respon.put("message", "Payment Successfully");
-            return respon;
-        }catch (Exception ex){
-            ex.printStackTrace();
-            ObjectNode respon = objectMapper.createObjectNode();
-            respon.put("error", -1);
-            respon.put("message", ex.getMessage());
-            respon.set("data", null);
-            return respon;
+        catch (Exception e)
+        {
+            e.printStackTrace();
         }
+        finally {
+            lock.unlock();
+        }
+        return new OrderResponse();
     }
 
     @Override
     public OrderResponse getOrderByOrderID(Integer OrderID) {
         return orderRepository.findById(OrderID)
                 .map(order -> {
-                    List<Product> productList = orderDetailRepository.findAllOrderDetailByOrderID(order.getId())
+                    List<Product> productList = orderDetailRepository.findAllOrderDetailByOrderID(order.getOrderID())
                             .stream()
                             .map(OrderDetail::getProduct)
                             .collect(Collectors.toList());
@@ -264,20 +169,11 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public Order findOrderByID(Integer orderID) {
-        return orderRepository.findById(orderID)
-                .map(order -> {
-                    return order;
-                })
-                .orElse(new Order());
-    }
-
-    @Override
     public List<OrderResponse> getAllOrder() {
         return orderRepository.findAll()
                 .stream()
                 .map(order -> {
-                    List<OrderDetail> orderDetailList = orderDetailRepository.findAllOrderDetailByOrderID(order.getId());
+                    List<OrderDetail> orderDetailList = orderDetailRepository.findAllOrderDetailByOrderID(order.getOrderID());
                     List<Product> productList = orderDetailList
                             .stream()
                             .map(OrderDetail::getProduct)
@@ -287,17 +183,18 @@ public class OrderServiceImpl implements OrderService {
                 .collect(Collectors.toList());
     }
 
-    private OrderResponse createOrderResponse(Order newestOrder1, List<Product> productList)
+    private OrderResponse createOrderResponse(Order newestOrder, List<Product> productList)
     {
         return OrderResponse.builder()
-                .orderID(newestOrder1.getId())
-                .customerID(newestOrder1.getCustomer().getCustomerID())
-                .customerPhone(newestOrder1.getCustomerPhone())
-                .customerName(newestOrder1.getCustomerName())
-                .customerEmail(newestOrder1.getCustomerEmail())
-                .customerAddress(newestOrder1.getCustomerAddress())
-                .note(newestOrder1.getDescription())
-                .orderAmount(newestOrder1.getAmount())
+                .orderID(newestOrder.getOrderID())
+                .customerID(newestOrder.getCustomer().getCustomerID())
+                .customerPhone(newestOrder.getCustomerPhone())
+                .customerName(newestOrder.getCustomerName())
+                .customerEmail(newestOrder.getCustomerEmail())
+                .customerAddress(newestOrder.getCustomerAddress())
+                .note(newestOrder.getNote())
+                .orderAmount(newestOrder.getAmount())
+                .orderDate(newestOrder.getOrderDate())
                 .productList(
                         productList.stream()
                             .map(this::mapperedToProductResponse)

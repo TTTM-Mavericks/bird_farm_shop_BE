@@ -2,11 +2,14 @@ package com.tttm.birdfarmshop.Models;
 
 import com.tttm.birdfarmshop.Enums.BirdColor;
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
-@RequiredArgsConstructor
 @AllArgsConstructor
+@NoArgsConstructor
 @Entity
 @Builder
 @Table(name = "[Bird]")
@@ -28,7 +31,7 @@ public class Bird {
   private Boolean fertility;
 
   @Column(name = "breedingTimes", nullable = true, unique = false)
-  private Integer breedingTimes;
+  private Integer BreedingTimes;
 
   @Column(name = "color", nullable = true, unique = false)
   private BirdColor color;

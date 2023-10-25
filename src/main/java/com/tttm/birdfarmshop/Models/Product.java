@@ -25,7 +25,7 @@ public class Product {
   private String productName;
 
   @Column(name = "price", unique = false, nullable = false)
-  private Integer price;
+  private Double price;
 
   @Column(name = "description", unique = false, nullable = true, columnDefinition = "nvarchar(255)")
   private String description;

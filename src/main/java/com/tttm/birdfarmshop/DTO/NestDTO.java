@@ -12,7 +12,7 @@ import java.util.List;
 public class NestDTO {
     private String productName;
 
-    private Integer price;
+    private Double price;
 
     private String description;
 

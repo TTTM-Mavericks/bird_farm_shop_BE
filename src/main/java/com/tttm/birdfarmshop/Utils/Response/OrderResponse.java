@@ -28,7 +28,7 @@ public class OrderResponse {
 
     private String note;
 
-    private Integer orderAmount;
+    private Float orderAmount;
 
     private Date orderDate;
 
