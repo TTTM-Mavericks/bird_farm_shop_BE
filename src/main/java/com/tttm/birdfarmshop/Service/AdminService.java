@@ -13,7 +13,6 @@ public interface AdminService {
     List<UserResponse> getAllCustomers();
     List<UserResponse> getAllShippers();
     List<UserResponse> getAllHealthcares();
-
     UserResponse BanUserAccount(int UserID);
 
     UserResponse UnBanUserAccount(int UserID);
