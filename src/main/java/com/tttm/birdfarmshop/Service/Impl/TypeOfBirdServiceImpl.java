@@ -10,6 +10,10 @@ import com.tttm.birdfarmshop.Utils.Response.TypeOfBirdResponse;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Service;
 
@@ -32,6 +36,7 @@ public class TypeOfBirdServiceImpl implements TypeOfBirdService {
     }
 
     @Override
+    @CacheEvict(value = "typeOfBirds", allEntries = true)
     public MessageResponse AddNewTypeOfBird(TypeOfBirdDTO dto) {
         int size = (int) typeOfBirdRepository.findAll().stream().count();
         String typeID = "TB00" + (size + 1);
@@ -50,6 +55,13 @@ public class TypeOfBirdServiceImpl implements TypeOfBirdService {
     }
 
     @Override
+    @Caching(
+            put = {
+                @CachePut(value = "typeOfBird", key = "#typeID", condition = "#typeID != null")
+    },
+            evict = {
+                @CacheEvict(value = "typeOfBirds", allEntries = true)
+    })
     public MessageResponse UpdateTypeOfBird(String typeID, TypeOfBirdDTO dto) {
        try
        {
@@ -77,6 +89,7 @@ public class TypeOfBirdServiceImpl implements TypeOfBirdService {
     }
 
     @Override
+    @Cacheable(value = "typeOfBird", key = "#typeID", condition = "#typeID != null")
     public TypeOfBirdResponse findTypeOfBirdByID(String typeID) {
         try{
             Optional<TypeOfBird> TypeOfBirdOptional = typeOfBirdRepository.findById(typeID);
@@ -84,15 +97,16 @@ public class TypeOfBirdServiceImpl implements TypeOfBirdService {
             {
                 return mapperedToTypeOfBirdResponse(TypeOfBirdOptional.get());
             }
-            else return new TypeOfBirdResponse();
         }
         catch (Exception e)
         {
             return new TypeOfBirdResponse();
         }
+        return new TypeOfBirdResponse();
     }
 
     @Override
+    @Cacheable(value = "typeOfBirds")
     public List<TypeOfBirdResponse> findAllTypeOfBird() {
         List<TypeOfBirdResponse> typeOfBirdResponseList = new ArrayList<>();
         List<TypeOfBird> list = typeOfBirdRepository.findAll();
@@ -114,6 +128,7 @@ public class TypeOfBirdServiceImpl implements TypeOfBirdService {
     }
 
     @Override
+    @Cacheable(value = "typeOfBirds", key = "#name", condition = "#name != null")
     public List<TypeOfBirdResponse> findTypeOfBirdByName(String name) {
         return typeOfBirdRepository.findAll()
                 .stream()

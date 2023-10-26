@@ -19,6 +19,10 @@ import lombok.RequiredArgsConstructor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.session.Session;
 import org.springframework.session.SessionRepository;
@@ -55,6 +59,7 @@ public class CodeStorageServiceImpl implements CodeStorageService {
     private static final Logger logger = LogManager.getLogger(AuthenticationServiceImpl.class);
 
     @Override
+    @CacheEvict(value = "users", allEntries = true)
     public MessageResponse getCodeFromSession(MailDTO dto, HttpSession session) {
         Long expirationTime = EmailAndExpiration.get(dto.getEmail());
         if(expirationTime != null && expirationTime < System.currentTimeMillis()) // Check the Expiration Time for each Keys store in KeySessions

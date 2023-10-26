@@ -17,6 +17,10 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Service;
 
@@ -39,6 +43,7 @@ public class FoodServiceImpl implements FoodService {
                 && !dto.getTypeOfProduct().isEmpty() && !dto.getTypeOfProduct().isBlank() && dto.getRating() >= 0;
     }
     @Override
+    @CacheEvict(value = "foods", allEntries = true)
     public MessageResponse AddNewFood(FoodDTO dto) {
 
         int size = (int) foodRepository.findAll().stream().count();
@@ -76,6 +81,13 @@ public class FoodServiceImpl implements FoodService {
 
     @Transactional
     @Override
+    @Caching(
+            put = {
+                    @CachePut(value = "food", key = "#foodID", condition = "#foodID != null")
+    },
+            evict = {
+                    @CacheEvict(value = "foods", allEntries = true)
+    })
     public MessageResponse UpdateFood(String foodID, FoodDTO dto) {
         try {
             Optional<Product> productOptional = productRepository.findById(foodID);
@@ -142,6 +154,7 @@ public class FoodServiceImpl implements FoodService {
     }
 
     @Override
+    @Cacheable(value = "food", key = "#foodID", condition = "#foodID != null")
     public ProductResponse findFoodByFoodID(String foodID) {
         try
         {
@@ -159,6 +172,7 @@ public class FoodServiceImpl implements FoodService {
     }
 
     @Override
+    @Cacheable(value = "foods")
     public List<ProductResponse> findAllFood() {
         return productRepository.findAllFood()
                 .stream()
@@ -179,18 +193,8 @@ public class FoodServiceImpl implements FoodService {
     }
 
     @Override
+    @Cacheable(value = "foods", key = "#productRequest.productName", condition = "#productRequest.productName != null")
     public List<ProductResponse> findFoodByName(ProductRequest productRequest) {
-//        List<Product> products = productRepository.findAllFood();
-//        List<ProductResponse> list = new ArrayList<>();
-//        for (Product product : products)
-//        {
-//            if(product.getTypeOfProduct().equals(productRequest.getTypeOfProduct().toUpperCase())
-//              && product.getProductName().contains(productRequest.getProductName()))
-//            {
-//                list.add(mapperedToProductResponse(product));
-//            }
-//        }
-//        return list;
         return productRepository.findAll()
                 .stream()
                 .filter(product -> product.getTypeOfProduct().equals(productRequest.getTypeOfProduct().toUpperCase())
