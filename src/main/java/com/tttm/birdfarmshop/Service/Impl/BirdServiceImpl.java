@@ -18,6 +18,10 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Service;
 
@@ -44,6 +48,7 @@ public class BirdServiceImpl implements BirdService {
     }
 
     @Override
+    @CacheEvict(value = "birds", allEntries = true)
     public MessageResponse AddNewBird(BirdDTO dto) {
         Optional<TypeOfBird> typeOfBirdOptional = typeOfBirdRepository.findById(dto.getTypeOfBirdID());
         Optional<HealthcareProfessional> healthcareProfessionalOptional = healthcareProfessionalRepository.findById(dto.getHealthcareProfessionalID());
@@ -103,9 +108,18 @@ public class BirdServiceImpl implements BirdService {
 
     @Transactional
     @Override
+    @Caching(
+            put = {
+                    @CachePut(value = "bird", key = "#birdID", condition = "#birdID != null")
+    },
+            evict = {
+                    @CacheEvict(value = "birds", allEntries = true)
+    })
     public MessageResponse UpdateBird(String birdID, BirdDTO dto) {
         try {
             Optional<Product> productOptional = productRepository.findById(birdID);
+
+
             if (productOptional.isEmpty()) {
                 return new MessageResponse("Fail");
             }
@@ -179,6 +193,7 @@ public class BirdServiceImpl implements BirdService {
     }
 
     @Override
+    @Cacheable(value = "bird", key = "#birdID", condition = "#birdID != null")
     public BirdResponse findBirdByBirdID(String birdID) {
         try {
             Optional<Product> productOptional = productRepository.findById(birdID);
@@ -192,6 +207,7 @@ public class BirdServiceImpl implements BirdService {
     }
 
     @Override
+    @Cacheable(value = "birds")
     public List<BirdResponse> findAllBird() {
         List<BirdResponse> BirdResponseList = new ArrayList<>();
         List<Product> productList = productRepository.findAllBird();
@@ -454,6 +470,7 @@ public class BirdServiceImpl implements BirdService {
     }
 
     @Override
+    @Cacheable(value = "birds", key = "#name", condition = "#name != null")
     public List<BirdResponse> findBirdByName(String name) {
         return productRepository
                 .findAll()

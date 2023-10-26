@@ -85,8 +85,6 @@ public class MailServiceImpl implements MailService {
         }
     }
 
-
-
     @Override
     public String SendCode(String Email) {
 
@@ -160,7 +158,9 @@ public class MailServiceImpl implements MailService {
             helper.setSubject(email_subject);
             helper.setText(thymeleafService.sendMailCancelOrder(msg), true);
             logger.info("Inside CancelOrder EmailServiceImpl Method");
-            javaMailSender.send(message);
+            new Thread(() -> {
+                javaMailSender.send(message);
+            }).start();
         }
         catch(Exception e)
         {
@@ -183,7 +183,9 @@ public class MailServiceImpl implements MailService {
             helper.setSubject(email_subject);
             helper.setText(thymeleafService.createContentVerifyAccount(code), true);
             logger.info("Send Mail Verify Account Method");
-            javaMailSender.send(message);
+            new Thread(() -> {
+                javaMailSender.send(message);
+            }).start();
         }
         catch(Exception e)
         {
@@ -207,7 +209,9 @@ public class MailServiceImpl implements MailService {
             helper.setTo(email_to);
             helper.setSubject(email_subject);
             helper.setText(thymeleafService.createContentForgotPassword(password), true);
-            javaMailSender.send(message);
+            new Thread(() -> {
+                javaMailSender.send(message);
+            }).start();
         }
         catch(Exception e)
         {
