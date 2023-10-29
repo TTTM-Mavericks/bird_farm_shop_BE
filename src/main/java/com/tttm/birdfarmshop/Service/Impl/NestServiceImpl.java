@@ -16,6 +16,10 @@ import com.tttm.birdfarmshop.Utils.Response.MessageResponse;
 import com.tttm.birdfarmshop.Utils.Response.ProductResponse;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Service;
 
@@ -35,6 +39,7 @@ public class NestServiceImpl implements NestService {
                 && !dto.getTypeOfProduct().isEmpty() && !dto.getTypeOfProduct().isBlank() && dto.getRating() >= 0;
     }
     @Override
+    @CacheEvict(value = "nests", allEntries = true)
     public MessageResponse AddNewNest(NestDTO dto) {
         int size = (int) nestRepository.findAll().stream().count();
         String NestID = "N00" + (size + 1);
@@ -71,6 +76,13 @@ public class NestServiceImpl implements NestService {
 
     @Transactional
     @Override
+    @Caching(
+            put = {
+                    @CachePut(value = "nest", key = "#nestID", condition = "#nestID != null")
+    },
+            evict = {
+                    @CacheEvict(value = "nests", allEntries = true)
+    })
     public MessageResponse UpdateNest(String nestID, NestDTO dto) {
         try {
             Optional<Product> productOptional = productRepository.findById(nestID);
@@ -135,6 +147,7 @@ public class NestServiceImpl implements NestService {
                 .build();
     }
     @Override
+    @Cacheable(value = "nest", key = "#nestID", condition = "#nestID != null")
     public ProductResponse findNestByNestID(String nestID) {
         try
         {
@@ -152,6 +165,7 @@ public class NestServiceImpl implements NestService {
     }
 
     @Override
+    @Cacheable(value = "nests")
     public List<ProductResponse> findAllNest() {
         return productRepository.findAllNest()
                 .stream()
@@ -172,6 +186,7 @@ public class NestServiceImpl implements NestService {
     }
 
     @Override
+    @Cacheable(value = "nests", key = "#productRequest.productName", condition = "#productRequest.productName != null")
     public List<ProductResponse> findNestByName(ProductRequest productRequest) {
         return productRepository.findAll()
                 .stream()

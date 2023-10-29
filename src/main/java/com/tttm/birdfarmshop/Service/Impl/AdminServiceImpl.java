@@ -11,6 +11,7 @@ import com.tttm.birdfarmshop.Utils.Response.UserResponse;
 import lombok.RequiredArgsConstructor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -33,6 +34,15 @@ public class AdminServiceImpl implements AdminService {
     }
 
     @Override
+    @Cacheable(value = "user", key = "#UserID")
+    public UserResponse findUserById(int UserID) {
+        return userRepository.findById(UserID)
+                .map(this::convertToUserResponse)
+                .orElse(null);
+    }
+
+    @Override
+    @Cacheable(value = "users")
     public List<UserResponse> getAllUsers() {
         logger.info("Get All Users");
         logger.info("Get All Users");
