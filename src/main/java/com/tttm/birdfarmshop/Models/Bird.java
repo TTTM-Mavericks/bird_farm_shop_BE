@@ -12,7 +12,7 @@ import lombok.*;
 @Table(name = "[Bird]")
 public class Bird {
   @Id
-  @Column(name = "birdID", nullable = false, unique = true, columnDefinition = "VARCHAR(255) CHARACTER SET utf8mb4")
+  @Column(name = "birdID", nullable = false, unique = true)
   private String birdID;
 
   @Column(name = "age", nullable = true, unique = false)

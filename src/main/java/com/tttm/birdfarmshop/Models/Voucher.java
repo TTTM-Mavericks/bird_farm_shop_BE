@@ -21,7 +21,7 @@ public class Voucher {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Integer voucherID;
 
-  @Column(name = "voucherName", nullable = false, unique = true, length = 100, columnDefinition = "NVARCHAR(255)")
+  @Column(name = "voucherName", nullable = false, unique = true, length = 100)
   private String voucherName;
 
   @Column(name = "startDate", nullable = false, unique = false)

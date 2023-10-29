@@ -14,7 +14,7 @@ import lombok.NoArgsConstructor;
 @Table(name = "[Food]")
 public class Food {
     @Id
-    @Column(name = "foodID", unique = true, nullable = false, columnDefinition = "NVARCHAR(255)")
+    @Column(name = "foodID", unique = true, nullable = false)
     private String foodID;
 
     @OneToOne

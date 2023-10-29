@@ -14,7 +14,7 @@ import lombok.NoArgsConstructor;
 @Table(name = "[Nest]")
 public class Nest {
     @Id
-    @Column(name = "nestID", unique = true, nullable = false, columnDefinition = "NVARCHAR(255)")
+    @Column(name = "nestID", unique = true, nullable = false)
     private String nestID;
 
     @OneToOne

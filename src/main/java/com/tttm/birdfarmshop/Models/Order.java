@@ -19,15 +19,15 @@ public class Order {
     @ManyToOne
     @JoinColumn(name = "customerID")
     private Customer customer;
-    @Column(name = "customerPhone", nullable = false, unique = false, columnDefinition = "NVARCHAR(255)")
+    @Column(name = "customerPhone", nullable = false, unique = false)
     private String customerPhone;
-    @Column(name = "customerName", unique = false, nullable = false, columnDefinition = "NVARCHAR(255)")
+    @Column(name = "customerName", unique = false, nullable = false)
     private String customerName;
-    @Column(name = "customerEmail", unique = false, nullable = false, columnDefinition = "NVARCHAR(255)")
+    @Column(name = "customerEmail", unique = false, nullable = false)
     private String customerEmail;
-    @Column(name = "customerAddress", nullable = false, unique = false, columnDefinition = "NVARCHAR(255)")
+    @Column(name = "customerAddress", nullable = false, unique = false)
     private String customerAddress;
-    @Column(name = "status", nullable = false, length = 255, columnDefinition = "VARCHAR(255) DEFAULT 'PENDING'")
+    @Column(name = "status", nullable = false, length = 255)
     private String status;
     @Column(name = "items", nullable = false)
     private String items;
@@ -37,9 +37,9 @@ public class Order {
     private String description;
     @Column(name = "payment_link")
     private String payment_link;
-    @Column(name = "created_at", columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
+    @Column(name = "created_at")
     private LocalDateTime created_at;
-    @Column(name = "updated_at", columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
+    @Column(name = "updated_at")
     private LocalDateTime updated_at;
     @ManyToOne
     @JoinColumn(name = "shipperID")

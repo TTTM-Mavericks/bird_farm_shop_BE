@@ -28,19 +28,19 @@ public class User implements UserDetails {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Integer userID;
 
-  @Column(name = "firstName", nullable = true, unique = false, length = 50, columnDefinition = "NVARCHAR(255)")
+  @Column(name = "firstName", nullable = true, unique = false, length = 50)
   private String firstName;
 
-  @Column(name = "lastName", nullable = true, unique = false, length = 50, columnDefinition = "NVARCHAR(255)")
+  @Column(name = "lastName", nullable = true, unique = false, length = 50)
   private String lastName;
 
-  @Column(name = "email", nullable = false, unique = true, length = 100, columnDefinition = "NVARCHAR(255)")
+  @Column(name = "email", nullable = false, unique = true, length = 100)
   private String email;
 
   @Column(name = "phone", nullable = false, unique = true, length = 12)
   private String phone;
 
-  @Column(name = "password", nullable = false, unique = false, length = 500, columnDefinition = "NVARCHAR(255)")
+  @Column(name = "password", nullable = false, unique = false, length = 500)
   private String password;
 
   @Column(name = "gender", nullable = true, unique = false)
@@ -50,7 +50,7 @@ public class User implements UserDetails {
   @Temporal(TemporalType.DATE)
   private Date dateOfBirth;
 
-  @Column(name = "address", nullable = false, unique = false, length = 200, columnDefinition = "NVARCHAR(255)")
+  @Column(name = "address", nullable = false, unique = false, length = 200)
   private String address;
 
   @Column(name = "accountStatus", nullable = false, unique = false)
