@@ -435,7 +435,7 @@ public class BirdServiceImpl implements BirdService {
             if (secondBird.getProductID().toUpperCase().equals(id.toUpperCase())) {
                 continue;
             }
-            if (!firstBird.getGender().equals(secondBird.getGender())) {
+            if (firstBird.getGender().equals(secondBird.getGender())) {
                 continue;
             }
             if (firstBird.getTypeOfBirdID() != secondBird.getTypeOfBirdID()) {
