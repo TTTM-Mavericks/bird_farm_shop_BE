@@ -162,7 +162,7 @@ public class OrderServiceImpl implements OrderService {
 
             List<ObjectNode> items = List.of(item);
             Body body = new Body(orderCode, orderAmount, description, items, "", "", "");
-            String returnUrl = "https://birdfarmshopbe-production.up.railway.app/" + newestOrder.getId();
+            String returnUrl = "/order/updatePaymentStatus" + newestOrder.getId();
             body.setReturnUrl("");
             body.setCancelUrl("");
             String bodyToSignature = Utils.createSignatureOfPaymentRequest(body, checksumKey);
