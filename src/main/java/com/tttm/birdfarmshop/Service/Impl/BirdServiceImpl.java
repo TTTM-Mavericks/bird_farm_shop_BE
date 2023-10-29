@@ -88,6 +88,8 @@ public class BirdServiceImpl implements BirdService {
                         .gender(dto.getGender())
                         .status(false)
                         .fertility(dto.getFertility())
+                        .breedingTimes(dto.getBreedingTimes())
+                        .color(dto.getColor())
                         .typeOfBird(typeOfBird)
                         .healthcareProfessional(healthcareProfessional)
                         .build()
@@ -157,6 +159,7 @@ public class BirdServiceImpl implements BirdService {
                 bird.setGender(dto.getGender());
                 bird.setFertility(dto.getFertility());
                 bird.setTypeOfBird(typeOfBird.get());
+                bird.setBreedingTimes(dto.getBreedingTimes());
                 bird.setHealthcareProfessional(healthcareProfessional.get());
                 birdRepository.save(bird);
 

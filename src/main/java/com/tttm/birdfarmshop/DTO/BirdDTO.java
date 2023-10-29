@@ -1,5 +1,6 @@
 package com.tttm.birdfarmshop.DTO;
 
+import com.tttm.birdfarmshop.Enums.BirdColor;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -31,6 +32,10 @@ public class BirdDTO {
     private Boolean gender;
 
     private Boolean fertility;
+
+    private Integer breedingTimes;
+
+    private BirdColor color;
 
     private String typeOfBirdID;
 
