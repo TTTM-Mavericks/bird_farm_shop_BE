@@ -162,7 +162,7 @@ public class OrderServiceImpl implements OrderService {
 
             List<ObjectNode> items = List.of(item);
             Body body = new Body(orderCode, orderAmount, description, items, "", "", "");
-            String returnUrl = "https://localhost:6969/order/updatePaymentStatus/" + newestOrder.getId();
+            String returnUrl = "https://birdfarmshopbe-production.up.railway.app/" + newestOrder.getId();
             body.setReturnUrl("");
             body.setCancelUrl("");
             String bodyToSignature = Utils.createSignatureOfPaymentRequest(body, checksumKey);
@@ -215,7 +215,8 @@ public class OrderServiceImpl implements OrderService {
             respon.set("data", objectMapper.createObjectNode()
                     .put("checkoutUrl", checkoutUrl)
                     .put("returnUrl", returnUrl)
-                    .put("orderCode", newestOrder.getId())
+                    .put("orderCode", orderCode)
+                    .put("orderID", newestOrder.getId())
             );
             return respon;
 
