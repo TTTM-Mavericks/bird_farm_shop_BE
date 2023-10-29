@@ -1,0 +1,27 @@
+spring:
+  jpa:
+    properties:
+      hibernate:
+        connection:
+          characterEncoding: UTF-8
+          charset: UTF-8
+          useUnicode: 'true'
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        use_nationalized_character_data: 'true'
+        show_sql: 'true'
+    hibernate:
+      ddl-auto: update
+  datasource:
+    password: baUun7NCp2Xf
+    driver-class-name: org.postgresql.Driver
+    username: default
+    url: jdbc:postgresql://ep-icy-bread-82284021-pooler.ap-southeast-1.postgres.vercel-storage.com:5432/verceldb
+application:
+  security:
+    jwt:
+      secret-key: 3F4428472B4B6250645367566B5970337336763979244226452948404D635166
+      expiration: '86400000   '
+      refresh-token:
+        expiration: '604800000 '
+server:
+  port: '6969'
