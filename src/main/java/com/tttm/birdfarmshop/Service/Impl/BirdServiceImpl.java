@@ -200,7 +200,7 @@ public class BirdServiceImpl implements BirdService {
         List<Product> productList = productRepository.findAllBird();
         for (Product product : productList) {
             Optional<Bird> birdOptional = birdRepository.findById(product.getProductID());
-            if (birdOptional.isPresent()) {
+            if (birdOptional.isPresent() && product.getQuantity() > 0) {
                 BirdResponseList.add(mapperedToBirdRepsonse(product, birdOptional.get()));
             }
         }
