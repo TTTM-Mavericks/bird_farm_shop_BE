@@ -1,5 +1,5 @@
-FROM openjdk:22-slim-bookworm
-LABEL mentainer="t.h.minh101002@gmail.com"
-WORKDIR /app
-COPY target/BirdFarmShop-0.0.1-SNAPSHOT.jar /app/BirdFarmShop.jar
-ENTRYPOINT ["java", "-jar", "BirdFarmShop.jar"]
+FROM eclipse-temurin:17-jdk-alpine
+VOLUME /tmp
+COPY target/BirdFarmShop-0.0.1-SNAPSHOT.jar BirdFarmShop.jar
+ENTRYPOINT ["java","-jar","/BirdFarmShop.jar"]
+EXPOSE 8080
