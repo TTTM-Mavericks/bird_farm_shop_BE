@@ -19,6 +19,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -85,8 +86,6 @@ public class MailServiceImpl implements MailService {
         }
     }
 
-
-
     @Override
     public String SendCode(String Email) {
 
@@ -144,7 +143,8 @@ public class MailServiceImpl implements MailService {
         return new MessageResponse("Success");
     }
 
-    private void sendMailCancelOrder(String email_to, String email_subject, String msg) {
+    @Async
+    public void sendMailCancelOrder(String email_to, String email_subject, String msg) {
         try{
 
             MimeMessage message = javaMailSender.createMimeMessage();
@@ -167,7 +167,9 @@ public class MailServiceImpl implements MailService {
             e.printStackTrace();
         }
     }
-    private void sendCodeToMail(String email_to, String email_subject, String code) {
+
+    @Async
+    public void sendCodeToMail(String email_to, String email_subject, String code) {
         try{
 
             MimeMessage message = javaMailSender.createMimeMessage();
@@ -191,7 +193,8 @@ public class MailServiceImpl implements MailService {
         }
     }
 
-    private void sendMailForgotPassword(String email_to, String email_subject, String password) {
+    @Async
+    public void sendMailForgotPassword(String email_to, String email_subject, String password) {
         try{
 
 

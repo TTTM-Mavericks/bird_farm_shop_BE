@@ -13,6 +13,10 @@ import com.tttm.birdfarmshop.Utils.Response.VoucherResponse;
 import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
 
 import java.text.ParseException;
@@ -37,6 +41,7 @@ public class VoucherServiceImpl implements VoucherService {
                 voucherRequest.getValue() >= 0;
     }
     @Override
+    @CacheEvict(value = "vouchers", allEntries = true)
     public MessageResponse createVoucher(VoucherRequest voucherRequest) {
         Voucher voucher = voucherRepository.findVoucherByVoucherName(voucherRequest.getVoucherName());
         if(voucher != null || !isValidInformation(voucherRequest))
@@ -65,6 +70,7 @@ public class VoucherServiceImpl implements VoucherService {
     }
 
     @Override
+    //@Cacheable(value = "voucher", key = "#voucherID", condition = "#voucherID >= 0")
     public VoucherResponse getVoucherByID(Integer voucherID) {
         return voucherRepository.findById(voucherID)
                 .map(voucher -> {
@@ -79,6 +85,10 @@ public class VoucherServiceImpl implements VoucherService {
     }
 
     @Override
+    @Caching(evict = {
+            @CacheEvict(value = "voucher", key = "#voucherID"),
+            @CacheEvict(value = "vouchers", allEntries = true)
+    })
     public MessageResponse updateVoucher(Integer voucherID, VoucherRequest voucherRequest) {
         if(!isValidInformation(voucherRequest))
         {
@@ -127,6 +137,7 @@ public class VoucherServiceImpl implements VoucherService {
         }
     }
     @Override
+    @Cacheable(value = "vouchers")
     public List<VoucherResponse> getAllVoucher() {
         return voucherRepository.findAll()
                 .stream()
@@ -156,6 +167,7 @@ public class VoucherServiceImpl implements VoucherService {
     }
 
     @Override
+    @Cacheable(value = "vouchers", key = "#name", condition = "#name != null")
     public List<VoucherResponse> findVoucherByName(String name) {
         return voucherRepository
                 .findAll()
