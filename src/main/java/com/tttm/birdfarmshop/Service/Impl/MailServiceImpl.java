@@ -19,6 +19,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -142,7 +143,8 @@ public class MailServiceImpl implements MailService {
         return new MessageResponse("Success");
     }
 
-    private void sendMailCancelOrder(String email_to, String email_subject, String msg) {
+    @Async
+    public void sendMailCancelOrder(String email_to, String email_subject, String msg) {
         try{
 
             MimeMessage message = javaMailSender.createMimeMessage();
@@ -158,16 +160,16 @@ public class MailServiceImpl implements MailService {
             helper.setSubject(email_subject);
             helper.setText(thymeleafService.sendMailCancelOrder(msg), true);
             logger.info("Inside CancelOrder EmailServiceImpl Method");
-            new Thread(() -> {
-                javaMailSender.send(message);
-            }).start();
+            javaMailSender.send(message);
         }
         catch(Exception e)
         {
             e.printStackTrace();
         }
     }
-    private void sendCodeToMail(String email_to, String email_subject, String code) {
+
+    @Async
+    public void sendCodeToMail(String email_to, String email_subject, String code) {
         try{
 
             MimeMessage message = javaMailSender.createMimeMessage();
@@ -183,9 +185,7 @@ public class MailServiceImpl implements MailService {
             helper.setSubject(email_subject);
             helper.setText(thymeleafService.createContentVerifyAccount(code), true);
             logger.info("Send Mail Verify Account Method");
-            new Thread(() -> {
-                javaMailSender.send(message);
-            }).start();
+            javaMailSender.send(message);
         }
         catch(Exception e)
         {
@@ -193,7 +193,8 @@ public class MailServiceImpl implements MailService {
         }
     }
 
-    private void sendMailForgotPassword(String email_to, String email_subject, String password) {
+    @Async
+    public void sendMailForgotPassword(String email_to, String email_subject, String password) {
         try{
 
 
@@ -209,9 +210,7 @@ public class MailServiceImpl implements MailService {
             helper.setTo(email_to);
             helper.setSubject(email_subject);
             helper.setText(thymeleafService.createContentForgotPassword(password), true);
-            new Thread(() -> {
-                javaMailSender.send(message);
-            }).start();
+            javaMailSender.send(message);
         }
         catch(Exception e)
         {
