@@ -11,11 +11,11 @@ import java.util.List;
 @Repository
 public interface OrderRepository extends JpaRepository<Order, Integer> {
     @Modifying
-    @Query(value = "delete from `order` where orderid = ?1", nativeQuery = true)
+    @Query(value = "delete from `orders` where orderid = ?1", nativeQuery = true)
     void deleteOrderByOrderID(Integer orderID);
 
     @Query(
-            value = " select * from `order`", nativeQuery = true
+            value = " select * from `orders`", nativeQuery = true
     )
     List<Order> getAllOrder();
 }

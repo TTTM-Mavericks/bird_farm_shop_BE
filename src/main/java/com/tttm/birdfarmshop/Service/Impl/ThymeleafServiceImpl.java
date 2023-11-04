@@ -29,6 +29,7 @@ public class ThymeleafServiceImpl implements ThymeleafService {
     private static final String TEMPLATE_FORGOT_PASSWORD = "mail_ForgotPassword";
     private static final String TEMPLATE_VERIFY_ACCOUNT = "mail_VerifyAccount";
     private static final String TEMPLATE_CANCEL_ORDER = "mail_CancelOrder";
+    private static final String TEMPLATE_COMPLETE_ORDER = "mail_CompletedOrder";
 
     private static TemplateEngine templateEngine;
 
@@ -97,5 +98,16 @@ public class ThymeleafServiceImpl implements ThymeleafService {
 
 
         return templateEngine.process(TEMPLATE_CANCEL_ORDER, context);
+    }
+
+    @Override
+    public String sendMailCompletedOrder(String message) {
+        final Context context = new Context();
+        System.out.println(message);
+
+        context.setVariable("CompletedOrder", message);
+
+
+        return templateEngine.process(TEMPLATE_COMPLETE_ORDER, context);
     }
 }

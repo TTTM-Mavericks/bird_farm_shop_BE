@@ -8,4 +8,5 @@ public interface ThymeleafService {
     String createContentVerifyAccount(String email);
 
     String sendMailCancelOrder(String message);
+    String sendMailCompletedOrder(String message);
 }

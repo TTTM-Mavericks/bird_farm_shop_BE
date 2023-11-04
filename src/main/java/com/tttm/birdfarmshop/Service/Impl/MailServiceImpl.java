@@ -1,7 +1,6 @@
 package com.tttm.birdfarmshop.Service.Impl;
 
 
-import com.tttm.birdfarmshop.Enums.AccountStatus;
 import com.tttm.birdfarmshop.Models.Order;
 import com.tttm.birdfarmshop.Models.User;
 import com.tttm.birdfarmshop.Repository.OrderRepository;
@@ -9,8 +8,7 @@ import com.tttm.birdfarmshop.Repository.UserRepository;
 import com.tttm.birdfarmshop.Service.JwtService;
 import com.tttm.birdfarmshop.Service.MailService;
 import com.tttm.birdfarmshop.Service.ThymeleafService;
-import com.tttm.birdfarmshop.Utils.Request.CancelOrderRequest;
-import com.tttm.birdfarmshop.Utils.Response.AuthenticationResponse;
+import com.tttm.birdfarmshop.Utils.Request.SendMailOrderRequest;
 import com.tttm.birdfarmshop.Utils.Response.MessageResponse;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
@@ -29,7 +27,6 @@ import java.time.ZoneId;
 import java.util.Date;
 import java.util.Optional;
 import java.util.Random;
-import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -122,9 +119,32 @@ public class MailServiceImpl implements MailService {
     }
 
     @Override
-    public MessageResponse sendMailForCancelOrder(CancelOrderRequest cancelOrderRequest) {
-        Optional<User> user = userRepository.findById(cancelOrderRequest.getCustomerId());
-        Optional<Order> order = orderRepository.findById(cancelOrderRequest.getOrderID());
+    public MessageResponse sendMailForCompleteOrder(SendMailOrderRequest sendMailOrderRequest) {
+        Optional<User> user = userRepository.findById(sendMailOrderRequest.getCustomerId());
+        Optional<Order> order = orderRepository.findById(sendMailOrderRequest.getOrderID());
+
+        LocalDateTime localDateTime = LocalDateTime.now();
+        Date systemDate = Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant());
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd-MM-yyyy");
+        String currentDateString = simpleDateFormat.format(systemDate);
+
+        if(order.isEmpty() || user.isEmpty()) return new MessageResponse("Fail to send Mail for Completed Order");
+
+        String email_to = sendMailOrderRequest.getEmail();
+        String email_subject = "Customer Order Successfully";
+        String message = "Customer Email : " + email_to +  " already Order Successfully with Order ID: " + order.get().getId() + " at " + currentDateString;
+
+        logger.info("Inside Completed EmailServiceImpl with message: " + message);
+
+        sendMailCompletedOrder(email_to, email_subject, message);
+
+        return new MessageResponse("Success");
+    }
+
+    @Override
+    public MessageResponse sendMailForCancelOrder(SendMailOrderRequest sendMailOrderRequest) {
+        Optional<User> user = userRepository.findById(sendMailOrderRequest.getCustomerId());
+        Optional<Order> order = orderRepository.findById(sendMailOrderRequest.getOrderID());
 
         LocalDateTime localDateTime = LocalDateTime.now();
         Date systemDate = Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant());
@@ -133,7 +153,7 @@ public class MailServiceImpl implements MailService {
 
         if(order.isEmpty() || user.isEmpty()) return new MessageResponse("Fail to send Mail for Cancel Order");
 
-        String email_to = cancelOrderRequest.getEmail();
+        String email_to = sendMailOrderRequest.getEmail();
         String email_subject = "Customer Cancel Order";
         String message = "Customer Email : " + email_to +  " already cancel your Order with Order ID: " + order.get().getId() + " at " + currentDateString;
 
@@ -142,6 +162,30 @@ public class MailServiceImpl implements MailService {
         sendMailCancelOrder(email_to, email_subject, message);
 
         return new MessageResponse("Success");
+    }
+
+    private void sendMailCompletedOrder(String email_to, String email_subject, String msg) {
+        try{
+
+            MimeMessage message = javaMailSender.createMimeMessage();
+
+            MimeMessageHelper helper = new MimeMessageHelper(
+                    message,
+                    MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED,
+                    StandardCharsets.UTF_8.name()
+            );
+
+            helper.setFrom(email);
+            helper.setTo(email_to);
+            helper.setSubject(email_subject);
+            helper.setText(thymeleafService.sendMailCompletedOrder(msg), true);
+            logger.info("Inside Completed EmailServiceImpl Method");
+            javaMailSender.send(message);
+        }
+        catch(Exception e)
+        {
+            e.printStackTrace();
+        }
     }
 
     private void sendMailCancelOrder(String email_to, String email_subject, String msg) {
