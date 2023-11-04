@@ -2,6 +2,7 @@ package com.tttm.birdfarmshop.Models;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -9,14 +10,18 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
+@Builder
 @Table(name = "[Nest]")
 public class Nest {
     @Id
     @Column(name = "nestID", unique = true, nullable = false)
-    private Integer nestID;
+    private String nestID;
 
     @OneToOne
     @JoinColumn(name = "nestID", referencedColumnName = "productID")
     private Product product;
 
+    public Nest(String nestID) {
+        this.nestID = nestID;
+    }
 }

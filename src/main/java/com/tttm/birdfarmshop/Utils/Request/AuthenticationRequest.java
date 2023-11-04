@@ -1,4 +1,4 @@
-package com.tttm.birdfarmshop.Utils;
+package com.tttm.birdfarmshop.Utils.Request;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

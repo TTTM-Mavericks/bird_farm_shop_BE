@@ -18,7 +18,7 @@ public class Customer {
   private Integer customerID;
 
   @Column(name = "numberCancleOrder")
-  private int numberCancleOrder;
+  private Integer numberCancleOrder;
 
   @OneToOne
   @JoinColumn(name = "customerID", referencedColumnName = "userID", updatable = false, insertable = false)

@@ -1,5 +1,6 @@
-package com.tttm.birdfarmshop.config;
+package com.tttm.birdfarmshop.Config;
 
+import com.tttm.birdfarmshop.Enums.AccountStatus;
 import com.tttm.birdfarmshop.Models.User;
 import com.tttm.birdfarmshop.Repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -18,28 +19,20 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 @RequiredArgsConstructor
 public class ApplicationConfig {
 
-    private final UserRepository userRepository;
+    private final UserRepository repository;
 
     @Bean
-    public UserDetailsService userDetailsService()
-    {
-        return email ->
-        {
-            User user =  userRepository.findUserByEmail(email);
-            if (user != null)
-            {
-                return user;
-            }
-            throw new UsernameNotFoundException("Email not found");
-        };
+    public UserDetailsService userDetailsService() {
+        return username -> repository.findUserByEmailAndActiveStatus(username, AccountStatus.ACTIVE.name())
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
     }
 
     @Bean
     public AuthenticationProvider authenticationProvider() {
-        DaoAuthenticationProvider daoAuthenticationProvider = new DaoAuthenticationProvider();
-        daoAuthenticationProvider.setPasswordEncoder(passwordEncoder());
-        daoAuthenticationProvider.setUserDetailsService(userDetailsService());
-        return daoAuthenticationProvider;
+        DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
+        authProvider.setUserDetailsService(userDetailsService());
+        authProvider.setPasswordEncoder(passwordEncoder());
+        return authProvider;
     }
 
     @Bean

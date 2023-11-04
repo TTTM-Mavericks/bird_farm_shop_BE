@@ -1,4 +1,4 @@
-package com.tttm.birdfarmshop.Utils;
+package com.tttm.birdfarmshop.Utils.Request;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -6,9 +6,11 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
-@Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class AuthenticationResponse {
-    private String token;
+@Builder
+public class ProductRequest {
+    private String productName;
+
+    private String typeOfProduct;
 }

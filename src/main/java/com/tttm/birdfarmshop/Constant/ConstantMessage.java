@@ -1,4 +1,4 @@
-package com.tttm.birdfarmshop.Service.Impl.ServiceMsg;
+package com.tttm.birdfarmshop.Constant;
 
 import lombok.Getter;
 

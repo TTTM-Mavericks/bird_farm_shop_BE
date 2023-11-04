@@ -1,4 +1,4 @@
-package com.tttm.birdfarmshop.Models;
+package com.tttm.birdfarmshop.Enums;
 
 public enum ERole {
   CUSTOMER,

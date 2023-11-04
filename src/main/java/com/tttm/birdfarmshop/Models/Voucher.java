@@ -1,9 +1,11 @@
 package com.tttm.birdfarmshop.Models;
 
+import com.tttm.birdfarmshop.Enums.VoucherStatus;
 import jakarta.persistence.*;
 
 import java.util.Date;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -11,6 +13,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
+@Builder
 @Table(name = "[Voucher]")
 public class Voucher {
   @Id
@@ -18,8 +21,8 @@ public class Voucher {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Integer voucherID;
 
-  @Column(name = "voucherName", nullable = false, unique = true, length = 100)
-  private Integer voucherName;
+  @Column(name = "voucherName", nullable = false, unique = true)
+  private String voucherName;
 
   @Column(name = "startDate", nullable = false, unique = false)
   @Temporal(TemporalType.DATE)
@@ -30,9 +33,21 @@ public class Voucher {
   private Date endDate;
 
   @Column(name = "value", nullable = false, unique = false)
-  private Integer value;
+  private Float value;
 
   @ManyToOne
   @JoinColumn(name = "sellerID")
   private Seller seller;
+
+  @Column(name = "voucherStatus", nullable = false, unique = false)
+  private VoucherStatus voucherStatus;
+
+  public Voucher(String voucherName, Date startDate, Date endDate, Float value, Seller seller, VoucherStatus voucherStatus) {
+    this.voucherName = voucherName;
+    this.startDate = startDate;
+    this.endDate = endDate;
+    this.value = value;
+    this.seller = seller;
+    this.voucherStatus = voucherStatus;
+  }
 }

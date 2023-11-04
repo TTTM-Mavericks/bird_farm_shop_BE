@@ -8,14 +8,14 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Entity
-@Table(name = "[ProductManager]")
+//@Entity
+//@Table(name = "[ProductManager]")
 public class ProductManager {
-  @Id
-  @Column(name = "productManagerID", unique = true, nullable = false)
+//  @Id
+//  @Column(name = "productManagerID", unique = true, nullable = false)
   private Integer productManagerID;
 
-  @OneToOne
-  @JoinColumn(name = "productManagerID", referencedColumnName = "userID", insertable = false, updatable = false)
+//  @OneToOne
+//  @JoinColumn(name = "productManagerID", referencedColumnName = "userID", insertable = false, updatable = false)
   private User user;
 }

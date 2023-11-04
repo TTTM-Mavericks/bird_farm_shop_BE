@@ -13,6 +13,8 @@ public interface JwtService {
 
     String generateToken(UserDetails userDetails);
 
+    String generateRefreshToken(UserDetails userDetails);
+
     Claims extractAllClaims(String token);
 
     <T> T extractClaim(String token, Function<Claims, T> claimsResolver);
@@ -23,7 +25,7 @@ public interface JwtService {
 
     boolean isValidToken(String token, UserDetails userDetails);
 
-    boolean isExpiredToken(String token);
+    boolean isTokenExpired(String token);
 
     Key getSignInKey();
 }

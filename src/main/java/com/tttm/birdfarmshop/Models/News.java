@@ -18,13 +18,13 @@ public class News {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Integer newsID;
 
-  @Column(name = "title", unique = false, nullable = false, length = 100)
+  @Column(name = "title", unique = false, nullable = false)
   private String title;
 
   @Column(name = "image", unique = false, nullable = true)
   private String image;
 
-  @Column(name = "content", unique = false, nullable = true, length = 500)
+  @Column(name = "content", unique = false, nullable = true)
   private String content;
 
   @Column(name = "date", unique = false, nullable = false)

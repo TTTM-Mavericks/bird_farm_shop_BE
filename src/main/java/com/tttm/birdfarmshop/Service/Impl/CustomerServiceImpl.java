@@ -5,8 +5,6 @@ import com.tttm.birdfarmshop.Models.User;
 import com.tttm.birdfarmshop.Repository.CustomerRepository;
 import com.tttm.birdfarmshop.Repository.UserRepository;
 import com.tttm.birdfarmshop.Service.CustomerService;
-import com.tttm.birdfarmshop.Service.Impl.ServiceMsg.ConstantMessage;
-import com.tttm.birdfarmshop.exception.CustomException;
 import lombok.RequiredArgsConstructor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
