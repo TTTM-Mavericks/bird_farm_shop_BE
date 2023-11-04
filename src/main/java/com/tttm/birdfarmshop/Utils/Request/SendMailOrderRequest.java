@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class CancelOrderRequest {
+public class SendMailOrderRequest {
     private Integer customerId;
 
     private String email;

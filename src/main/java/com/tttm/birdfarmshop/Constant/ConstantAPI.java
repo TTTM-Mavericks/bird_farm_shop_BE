@@ -91,6 +91,7 @@ public class ConstantAPI {
     public static final String GET_ALL_ORDER = "/getAllOrder";
     public static final String DELETE_ORDER = "/deleteOrder";
     public static final String SEND_MAIL_CANCEL_ORDER = "/sendMailForCancelOrder";
+    public static final String SEND_MAIL_COMPLETE_ORDER = "/sendMailCompleteOrder";
 
     //Voucher Function
     public static final String CREATE_VOUCHER = "/createVoucher";
