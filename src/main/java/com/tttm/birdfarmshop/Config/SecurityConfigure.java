@@ -47,7 +47,7 @@ public class SecurityConfigure {
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
         httpSecurity
-//                .csrf(AbstractHttpConfigurer::disable)
+                .csrf(AbstractHttpConfigurer::disable)
 
                 //Set access denied handler
 //                .exceptionHandling(access -> access.accessDeniedHandler(restAccessDenyEntryPoint))
@@ -136,7 +136,7 @@ public class SecurityConfigure {
 //                .httpBasic(Customizer.withDefaults())
 //                .authenticationProvider(authenticationProvider)
 //                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
-//                .addFilterBefore(new SimpleCORSFilter(), WebAsyncManagerIntegrationFilter.class)
+                .addFilterBefore(new SimpleCORSFilter(), WebAsyncManagerIntegrationFilter.class)
                 .logout(logout ->
                         logout.logoutUrl("/auth/logout")
                                 .addLogoutHandler(logoutHandler)
