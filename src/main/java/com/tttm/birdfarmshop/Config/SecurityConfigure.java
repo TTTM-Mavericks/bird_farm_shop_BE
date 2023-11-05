@@ -55,18 +55,18 @@ public class SecurityConfigure {
 //                //Set unauthorized handler
 //                .exceptionHandling(access -> access.authenticationEntryPoint(restUnauthorizedEntryPoint))
 //
-//                .authorizeHttpRequests(
-//                        auth ->
-//                            auth.requestMatchers(WHITE_LIST_URL)
-//                                    .permitAll()
-//
-//                )
+                .authorizeHttpRequests(
+                        auth ->
+                            auth.requestMatchers(WHITE_LIST_URL)
+                                    .permitAll()
 
-//                .authorizeHttpRequests((authorize) ->
-//                        authorize
-//                                .anyRequest()
-//                                .permitAll()
-//                )
+                )
+
+                .authorizeHttpRequests((authorize) ->
+                        authorize
+                                .anyRequest()
+                                .permitAll()
+                )
 
 //                .authorizeHttpRequests((authorize) ->
 //                        authorize

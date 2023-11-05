@@ -42,6 +42,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
     @Override
     public AuthenticationResponse login(AuthenticationRequest dto) throws CustomException {
+        if(userRepository.findUserByEmailAndPassword(dto.getEmail(), dto.getPassword()) == null) return new AuthenticationResponse();
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         dto.getEmail(),
