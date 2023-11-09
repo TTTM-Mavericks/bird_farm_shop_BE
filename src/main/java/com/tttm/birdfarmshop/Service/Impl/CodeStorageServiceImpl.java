@@ -158,12 +158,12 @@ public class CodeStorageServiceImpl implements CodeStorageService {
         if (userRepository.findUserByEmail(dto.getEmail()) != null)
         {
             logger.warn(ConstantMessage.EMAIL_IS_EXIST);
-            throw new CustomException(ConstantMessage.EMAIL_IS_EXIST.toString());
+            return new MessageResponse("Fail");
         }
         if (userRepository.findUserByPhone(dto.getPhone()) != null)
         {
             logger.warn(ConstantMessage.PHONE_IS_EXIST);
-            throw new CustomException(ConstantMessage.PHONE_IS_EXIST.toString());
+            return new MessageResponse("Fail");
         }
         User user = User.builder()
                 .firstName(dto.getFirstName())

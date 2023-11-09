@@ -2,6 +2,7 @@ package com.tttm.birdfarmshop.Service.Impl;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.tttm.birdfarmshop.Enums.AccountStatus;
 import com.tttm.birdfarmshop.Enums.OrderStatus;
@@ -10,15 +11,19 @@ import com.tttm.birdfarmshop.Enums.VoucherStatus;
 import com.tttm.birdfarmshop.Exception.CustomException;
 import com.tttm.birdfarmshop.Models.*;
 import com.tttm.birdfarmshop.Repository.*;
+import com.tttm.birdfarmshop.Service.MailService;
 import com.tttm.birdfarmshop.Service.OrderService;
 import com.tttm.birdfarmshop.Utils.Body;
 import com.tttm.birdfarmshop.Utils.Request.OrderRequest;
+import com.tttm.birdfarmshop.Utils.Request.SendMailOrderRequest;
 import com.tttm.birdfarmshop.Utils.Response.MessageResponse;
 import com.tttm.birdfarmshop.Utils.Response.OrderResponse;
 import com.tttm.birdfarmshop.Utils.Response.ProductResponse;
 import com.tttm.birdfarmshop.Utils.Utils;
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.aspectj.weaver.ast.Or;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -58,6 +63,7 @@ public class OrderServiceImpl implements OrderService {
     private final VoucherRepository voucherRepository;
     private final ImageRepository imageRepository;
     private final UserRepository userRepository;
+    private final MailService mailService;
 
     @Override
     public ObjectNode CreateOrder(OrderRequest order) {
@@ -159,7 +165,7 @@ public class OrderServiceImpl implements OrderService {
             List<Order> orderList = orderRepository.getAllOrder();
             int size = orderRepository.findAll().size();
             Order newestOrder = orderList.get(size - 1);
-
+            newestOrder.setStatus(OrderStatus.PROCESSING);
             List<ObjectNode> items = List.of(item);
             Body body = new Body(orderCode, orderAmount, description, items, "", "", "");
             String returnUrl = "/order/updatePaymentStatus" + newestOrder.getId();
@@ -199,9 +205,9 @@ public class OrderServiceImpl implements OrderService {
 
             productList.forEach(product ->
                     {
-                        product.setQuantity(product.getQuantity() - 1);
-                        product.setProductStatus(ProductStatus.UNAVAILABLE);
-                        productRepository.save(product);
+//                        product.setQuantity(product.getQuantity() - 1);
+//                        product.setProductStatus(ProductStatus.UNAVAILABLE);
+//                        productRepository.save(product);
                         orderDetailRepository.save(new OrderDetail(product, newestOrder));
                     }
             );
@@ -215,9 +221,14 @@ public class OrderServiceImpl implements OrderService {
             respon.set("data", objectMapper.createObjectNode()
                     .put("checkoutUrl", checkoutUrl)
                     .put("returnUrl", returnUrl)
+                    .put("orderStatus", newestOrder.getStatus().name())
                     .put("orderCode", orderCode)
                     .put("orderID", newestOrder.getId())
             );
+
+//            Order updatePaymentLinkOrder = orderRepository.getById(newestOrder.getId());
+            newestOrder.setPayment_link(checkoutUrl);
+            orderRepository.save(newestOrder);
             return respon;
 
         }catch (Exception ex){
@@ -237,9 +248,28 @@ public class OrderServiceImpl implements OrderService {
             Order order = orderRepository.getReferenceById(orderId);
             order.setStatus(OrderStatus.COMPLETED);
             orderRepository.save(order);
+
+            List<OrderDetail> orderDetailList = orderDetailRepository.findAllOrderDetailByOrderID(orderId);
+            for (OrderDetail orderDetail : orderDetailList){
+                Product product = orderDetail.getProduct();
+                product.setQuantity(product.getQuantity() - 1);
+                if(product.getQuantity() < 1)
+                    product.setProductStatus(ProductStatus.UNAVAILABLE);
+                productRepository.save(product);
+                orderDetail.setProduct(product);
+//                orderDetailRepository.save(new OrderDetail(product, order));
+            }
+
             ObjectNode respon = objectMapper.createObjectNode();
             respon.put("success", 200);
             respon.put("message", "Payment Successfully");
+            respon.put("orderStatus", OrderStatus.COMPLETED.name());
+            SendMailOrderRequest sendMailOrderRequest = new SendMailOrderRequest(
+                    order.getCustomer().getCustomerID(),
+                    order.getCustomer().getUser().getEmail(),
+                    orderId);
+            mailService.sendMailForCompleteOrder(sendMailOrderRequest);
+
             return respon;
         }catch (Exception ex){
             ex.printStackTrace();
@@ -252,16 +282,43 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public OrderResponse getOrderByOrderID(Integer OrderID) {
-        return orderRepository.findById(OrderID)
-                .map(order -> {
-                    List<Product> productList = orderDetailRepository.findAllOrderDetailByOrderID(order.getId())
-                            .stream()
-                            .map(OrderDetail::getProduct)
-                            .collect(Collectors.toList());
-                    return createOrderResponse(order, productList);
-                })
-                .orElse(new OrderResponse());
+    public ObjectNode getOrderByOrderID(Integer OrderID) {
+        ObjectMapper objectMapper = new ObjectMapper();
+        try{
+            // Tìm đơn hàng từ cơ sở dữ liệu bằng ID
+            Order order = orderRepository.findById(OrderID).orElse(null);
+            ObjectNode resultNode = JsonNodeFactory.instance.objectNode();
+            if (order != null) {
+                resultNode.put("id", order.getId());
+                resultNode.put("customerName", order.getCustomerName());
+                resultNode.put("customerEmail", order.getCustomerEmail());
+                resultNode.put("customerPhone", order.getCustomerPhone());
+                resultNode.put("customerAddress", order.getCustomerAddress());
+                resultNode.put("totalPrice", order.getAmount());
+                resultNode.put("paymentLink", order.getPayment_link());
+                resultNode.put("orderStatus", order.getStatus().name());
+
+                ArrayNode productArray = resultNode.putArray("products");
+                List<OrderDetail> orderDetailList = orderDetailRepository.findAllOrderDetailByOrderID(OrderID);
+                for (OrderDetail orderDetail : orderDetailList) {
+                    ObjectNode productNode = JsonNodeFactory.instance.objectNode();
+                    productNode.put("productId", orderDetail.getProduct().getProductID());
+                    productNode.put("productName", orderDetail.getProduct().getProductName());
+                    productNode.put("price", orderDetail.getProduct().getPrice());
+                    productArray.add(productNode);
+                }
+            } else {
+                resultNode.put("error", "Order not found");
+            }
+            return resultNode;
+        } catch (Exception ex){
+            ex.printStackTrace();
+            ObjectNode respon = objectMapper.createObjectNode();
+            respon.put("error", -1);
+            respon.put("message", ex.getMessage());
+            respon.set("data", null);
+            return respon;
+        }
     }
 
     @Override
@@ -274,18 +331,74 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public List<OrderResponse> getAllOrder() {
-        return orderRepository.findAll()
+    public ObjectNode getAllOrder() {
+//        return orderRepository.findAll()
+//                .stream()
+//                .map(order -> {
+//                    List<OrderDetail> orderDetailList = orderDetailRepository.findAllOrderDetailByOrderID(order.getId());
+//                    List<Product> productList = orderDetailList
+//                            .stream()
+//                            .map(OrderDetail::getProduct)
+//                            .collect(Collectors.toList());
+//                    return createOrderResponse(order, productList);
+//                })
+//                .collect(Collectors.toList());
+        ObjectMapper objectMapper = new ObjectMapper();
+        try{
+            List<Order> orderList = orderRepository.getAllOrder();
+            ObjectNode resultNode = JsonNodeFactory.instance.objectNode();
+            ArrayNode orderArray = resultNode.putArray("orders");
+            for(Order order : orderList) {
+                if (order != null) {
+                    ObjectNode orderNode = JsonNodeFactory.instance.objectNode();
+                    orderNode.put("id", order.getId());
+                    orderNode.put("customerName", order.getCustomerName());
+                    orderNode.put("customerEmail", order.getCustomerEmail());
+                    orderNode.put("customerPhone", order.getCustomerPhone());
+                    orderNode.put("customerAddress", order.getCustomerAddress());
+                    orderNode.put("totalPrice", order.getAmount());
+                    orderNode.put("paymentLink", order.getPayment_link());
+                    orderNode.put("orderStatus", order.getStatus().name());
+
+                    ArrayNode productArray = orderNode.putArray("products");
+                    List<OrderDetail> orderDetailList = orderDetailRepository.findAllOrderDetailByOrderID(order.getId());
+                    for (OrderDetail orderDetail : orderDetailList) {
+                        ObjectNode productNode = JsonNodeFactory.instance.objectNode();
+                        productNode.put("productId", orderDetail.getProduct().getProductID());
+                        productNode.put("productName", orderDetail.getProduct().getProductName());
+                        productNode.put("price", orderDetail.getProduct().getPrice());
+                        productArray.add(productNode);
+                    }
+                    orderArray.add(orderNode);
+                } else {
+                    resultNode.put("error", "Order not found");
+                }
+            }
+            return resultNode;
+        } catch (Exception ex){
+            ex.printStackTrace();
+            ObjectNode respon = objectMapper.createObjectNode();
+            respon.put("error", -1);
+            respon.put("message", ex.getMessage());
+            respon.set("data", null);
+            return respon;
+        }
+    }
+
+    @Override
+    public List<OrderResponse> viewOrderHistoryCustomer(int customerId) {
+        List<OrderResponse> orderResponseList = orderRepository.viewOrderHistoryCustomer(customerId)
                 .stream()
                 .map(order -> {
                     List<OrderDetail> orderDetailList = orderDetailRepository.findAllOrderDetailByOrderID(order.getId());
-                    List<Product> productList = orderDetailList
-                            .stream()
-                            .map(OrderDetail::getProduct)
+                    List<Product> productList = orderDetailList.stream()
+                            .map(orderDetail -> productRepository.findById(orderDetail.getProduct().getProductID()).orElse(null))
+                            .filter(Objects::nonNull)
                             .collect(Collectors.toList());
                     return createOrderResponse(order, productList);
                 })
                 .collect(Collectors.toList());
+        return orderResponseList;
     }
 
     private OrderResponse createOrderResponse(Order newestOrder1, List<Product> productList)
@@ -304,6 +417,7 @@ public class OrderServiceImpl implements OrderService {
                             .map(this::mapperedToProductResponse)
                             .collect(Collectors.toList())
                 )
+                .OrderStatus(newestOrder1.getStatus().name())
                 .build();
     }
 
@@ -364,16 +478,9 @@ public class OrderServiceImpl implements OrderService {
                 }
         );
 
-        // Delete OrderVoucher by Order ID
         orderVoucherRepository.deleteOrderVoucherByOrderID(OrderID);
 
-        // Delete OrderDetail by Order ID
-        orderDetailRepository.deleteOrderDetailByOrderID(OrderID);
-
-        // Delete Order By OrderID
         orderRepository.deleteOrderByOrderID(OrderID);
-
-        // Check if Customer Cancel Order exceed specific times
 
         int numberCancleOrder = customer.getNumberCancleOrder();
         String message = "Success";
@@ -387,6 +494,11 @@ public class OrderServiceImpl implements OrderService {
             user.setAccountStatus(AccountStatus.INACTIVE);
             userRepository.save(user);
         }
+        SendMailOrderRequest sendMailOrderRequest = new SendMailOrderRequest(
+                order.get().getCustomer().getCustomerID(),
+                order.get().getCustomer().getUser().getEmail(),
+                order.get().getId());
+        mailService.sendMailForCancelOrder(sendMailOrderRequest);
         customer.setNumberCancleOrder(numberCancleOrder + 1);
         customerRepository.save(customer);
 

@@ -1,5 +1,6 @@
 package com.tttm.birdfarmshop.Models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -24,6 +25,7 @@ public class Customer {
   @JoinColumn(name = "customerID", referencedColumnName = "userID", updatable = false, insertable = false)
   private User user;
 
+  @JsonIgnore
   @ManyToOne
   @JoinColumn(name = "sellerID")
   private Seller seller;

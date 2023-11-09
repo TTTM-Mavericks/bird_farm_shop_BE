@@ -1,5 +1,6 @@
 package com.tttm.birdfarmshop.Models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -16,10 +17,12 @@ public class OrderDetail {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Integer orderDetailID;
 
+  @JsonIgnore
   @ManyToOne
   @JoinColumn(name = "productID")
   private Product product;
 
+  @JsonIgnore
   @ManyToOne
   @JoinColumn(name = "orderID")
   private Order order;

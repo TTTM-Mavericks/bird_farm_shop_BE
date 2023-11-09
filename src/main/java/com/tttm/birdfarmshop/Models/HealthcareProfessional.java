@@ -1,5 +1,6 @@
 package com.tttm.birdfarmshop.Models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -21,6 +22,7 @@ public class HealthcareProfessional {
   @JoinColumn(name = "healthcareID", referencedColumnName = "userID", insertable = false, updatable = false)
   private User user;
 
+  @JsonIgnore
   @OneToMany(mappedBy = "healthcareProfessional")
   private List<Bird> birdList;
 

@@ -7,6 +7,7 @@ import com.tttm.birdfarmshop.Constant.ConstantParametter;
 import com.tttm.birdfarmshop.Exception.CustomException;
 import com.tttm.birdfarmshop.Service.OrderService;
 import com.tttm.birdfarmshop.Utils.Request.OrderRequest;
+import com.tttm.birdfarmshop.Utils.Response.BirdResponse;
 import com.tttm.birdfarmshop.Utils.Response.MessageResponse;
 import com.tttm.birdfarmshop.Utils.Response.OrderResponse;
 import jakarta.websocket.server.PathParam;
@@ -50,20 +51,28 @@ public class OrderController {
     }
 
     @GetMapping(ConstantAPI.GET_ORDER_BY_ID + ConstantParametter.ORDER_ID)
-    public ResponseEntity<OrderResponse> getFoodByID(@PathVariable("OrderID") Integer OrderID) throws CustomException {
+    public ObjectNode getOrderByID(@PathVariable("OrderID") Integer OrderID) throws CustomException {
+        ObjectMapper objectMapper = new ObjectMapper();
         try {
-            return new ResponseEntity<>(orderService.getOrderByOrderID(OrderID), HttpStatus.OK);
+            return orderService.getOrderByOrderID(OrderID);
         } catch (Exception ex) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            ObjectNode respon = objectMapper.createObjectNode();
+            respon.put("error", ex.getLocalizedMessage());
+            respon.put("message", ex.getMessage());
+            return respon;
         }
     }
 
     @GetMapping(ConstantAPI.GET_ALL_ORDER)
-    public ResponseEntity<List<OrderResponse>> getAllOrder() throws CustomException {
+    public ObjectNode getAllOrder() throws CustomException {
+        ObjectMapper objectMapper = new ObjectMapper();
         try {
-            return new ResponseEntity<>(orderService.getAllOrder(), HttpStatus.OK);
+            return orderService.getAllOrder();
         } catch (Exception ex) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            ObjectNode respon = objectMapper.createObjectNode();
+            respon.put("error", ex.getLocalizedMessage());
+            respon.put("message", ex.getMessage());
+            return respon;
         }
     }
 
@@ -71,6 +80,14 @@ public class OrderController {
     public ResponseEntity<MessageResponse> deleteOrder(@PathVariable("OrderID") Integer OrderID) throws CustomException {
         try {
             return new ResponseEntity<>(orderService.DeleteOrder(OrderID), HttpStatus.OK);
+        } catch (Exception ex) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+    }
+    @GetMapping(ConstantAPI.VIEW_ORDER_HISTORY_CUSTOMER + ConstantParametter.USER_ID)
+    public ResponseEntity<List<OrderResponse>> viewOrderHistoryCustomer(@PathVariable("UserID") Integer UserID) throws CustomException {
+        try {
+            return new ResponseEntity<>(orderService.viewOrderHistoryCustomer(UserID), HttpStatus.OK);
         } catch (Exception ex) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }

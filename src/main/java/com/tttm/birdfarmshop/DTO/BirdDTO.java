@@ -21,6 +21,8 @@ public class BirdDTO {
 
     private List<String> images;
 
+    private Integer ownerID;
+
     private String feedback;
 
     private Integer rating;

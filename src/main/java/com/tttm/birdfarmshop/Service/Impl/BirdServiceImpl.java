@@ -34,13 +34,15 @@ public class BirdServiceImpl implements BirdService {
     private final HealthcareProfessionalRepository healthcareProfessionalRepository;
     private final TypeOfBirdRepository typeOfBirdRepository;
     private final ImageRepository imageRepository;
+    private final UserRepository userRepository;
+    private final CustomerRepository customerRepository;
     private final Logger logger = LoggerFactory.getLogger(BirdServiceImpl.class);
 
     private boolean isValidFood(BirdDTO dto) {
         return !dto.getProductName().isBlank() && !dto.getProductName().isEmpty() && dto.getPrice() >= 0
                 && !dto.getTypeOfProduct().isEmpty() && !dto.getTypeOfProduct().isBlank() && dto.getRating() >= 0
                 && !dto.getFertility().toString().isBlank() && !dto.getFertility().toString().isEmpty()
-                && !dto.getTypeOfBirdID().isEmpty() && !dto.getTypeOfBirdID().isBlank();
+                && !dto.getTypeOfBirdID().isEmpty() && !dto.getTypeOfBirdID().isBlank() && dto.getOwnerID() >= 0;
     }
 
     @Override
@@ -86,7 +88,7 @@ public class BirdServiceImpl implements BirdService {
                         .birdID(BirdID)
                         .age(dto.getAge())
                         .gender(dto.getGender())
-                        .status(false)
+                        .ownerID(dto.getOwnerID())
                         .fertility(dto.getFertility())
                         .breedingTimes(dto.getBreedingTimes())
                         .color(dto.getColor())
@@ -102,6 +104,7 @@ public class BirdServiceImpl implements BirdService {
 
         return new MessageResponse("Success");
     }
+
 
     @Transactional
     @Override
@@ -161,6 +164,8 @@ public class BirdServiceImpl implements BirdService {
                 bird.setTypeOfBird(typeOfBird.get());
                 bird.setBreedingTimes(dto.getBreedingTimes());
                 bird.setHealthcareProfessional(healthcareProfessional.get());
+                bird.setColor(dto.getColor());
+                bird.setOwnerID(dto.getOwnerID());
                 birdRepository.save(bird);
 
                 // Update Type Of Bird Quantity
@@ -207,6 +212,20 @@ public class BirdServiceImpl implements BirdService {
         return BirdResponseList;
     }
 
+    @Override
+    public BirdResponse updateBirdOwner(String birdID, int customerID) {
+        Optional<User> userOptional = userRepository.findById(customerID);
+        Optional<Customer> customerOptional = customerRepository.findById(customerID);
+        Optional<Bird> birdOptional = birdRepository.findById(birdID);
+        Optional<Product> productOptional = productRepository.findById(birdID);
+        if(userOptional.isEmpty() || customerOptional.isEmpty() || birdOptional.isEmpty() || productOptional.isEmpty())
+        {
+            return new BirdResponse();
+        }
+        birdOptional.get().setOwnerID(customerID);
+        birdRepository.save(birdOptional.get());
+        return mapperedToBirdRepsonse(productOptional.get(), birdOptional.get());
+    }
 
     private BirdResponse mapperedToBirdRepsonse(Product product, Bird bird) {
         return BirdResponse.builder()
@@ -227,17 +246,20 @@ public class BirdServiceImpl implements BirdService {
                 .age(bird.getAge())
                 .gender(bird.getGender())
                 .fertility(bird.getFertility())
+                .birdColor(bird.getColor())
+                .breedingTimes(bird.getBreedingTimes())
                 .typeOfBirdID(bird.getTypeOfBird().getTypeID())
                 .healthcareProfessionalID(bird.getHealthcareProfessional().getHealthcareID())
+                .ownerID(bird.getOwnerID())
                 .build();
 
     }
 
     private boolean checkBirdInfo(BirdMatching bird) {
-        if (bird.getBreedingTimes() >= 5) {
+        if (bird.getBreedingTimes() >= 8) {
             return false;
         }
-        if (bird.getAge() >= 4) {
+        if (bird.getAge() >= 8) {
             return false;
         }
         return true;
@@ -318,7 +340,7 @@ public class BirdServiceImpl implements BirdService {
 //        System.out.println(birdToNum(firstBird));
 //        System.out.println(birdToNum(secondBird));
         float simulate = simulateMatching(birdToNum(firstBird), birdToNum(secondBird));
-        if (simulate < 50f) {
+        if (simulate < 20f) {
             throw new CustomException("The success rate is not good: " + simulate);
         }
         Random random = new Random();
@@ -328,7 +350,7 @@ public class BirdServiceImpl implements BirdService {
                 .gender(random.nextBoolean())
                 .age(0)
                 .fertility(true)
-                .status(true)
+                .ownerID(0)
                 .color(caculateResult(firstBird, secondBird))
                 .build();
 
@@ -390,7 +412,7 @@ public class BirdServiceImpl implements BirdService {
                 continue;
             }
             float simulate = simulateMatching(birdToNum(firstBird), birdToNum(secondBird));
-            if (simulate < 50f) {
+            if (simulate < 20f) {
                 continue;
             }
             if (!firstBird.getTypeOfBirdID().equals(secondBird.getTypeOfBirdID())) {
@@ -445,7 +467,7 @@ public class BirdServiceImpl implements BirdService {
                 continue;
             }
             float simulate = simulateMatching(birdToNum(firstBird), birdToNum(secondBird));
-            if (simulate < 50f) {
+            if (simulate < 20f) {
                 continue;
             }
             if (responseList == null) {

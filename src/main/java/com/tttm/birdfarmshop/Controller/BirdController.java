@@ -56,6 +56,15 @@ public class BirdController {
         }
     }
 
+    @PutMapping(ConstantAPI.UPDATE_BIRD_OWNER)
+    public ResponseEntity<BirdResponse> updateBirdOwner(@RequestParam("BirdID") String BirdID,
+                                                        @RequestParam("UserID") int UserID) throws CustomException {
+        try {
+            return new ResponseEntity<>(birdService.updateBirdOwner(BirdID, UserID), HttpStatus.OK);
+        } catch (Exception ex) {
+            return new ResponseEntity<>(new BirdResponse(), HttpStatus.FORBIDDEN);
+        }
+    }
     @PutMapping(ConstantAPI.UPDATE_BIRD + ConstantParametter.BIRD_ID)
     public ResponseEntity<MessageResponse> updateBird(@PathVariable("BirdID") String BirdID, @RequestBody BirdDTO dto) throws CustomException {
         try {
@@ -92,11 +101,15 @@ public class BirdController {
             ObjectNode respon = objectMapper.createObjectNode();
             respon.put("success", 200);
             respon.put("message", "Matching Bird Successfully!");
+            respon.put("successRate", String.valueOf(birdChild.getSuccessRate()));
             respon.set("data", objectMapper.createObjectNode()
-                    .put("successRate", String.valueOf(birdChild.getSuccessRate()))
-                    .put("birdType", birdChild.getBird().getTypeOfBird().getTypeName())
-                    .put("birdGender", birdChild.getBird().getGender())
-                    .put("birdColor", birdChild.getBird().getColor().name())
+                    .put("age", 0)
+                    .put("gender", birdChild.getBird().getGender())
+                    .put("ownerID", 0)
+                    .put("fertility", true)
+                    .put("breedingTimes", 0)
+                    .put("color", birdChild.getBird().getColor().name())
+                    .put("typeOfBird", birdChild.getBird().getTypeOfBird().getTypeName())
             );
             return respon;
 

@@ -83,6 +83,7 @@ public class ConstantAPI {
     public static final String SORT_BIRD_BY_ALPHABET_ASC = "/sortBirdByAlphabetAscending";
     public static final String SORT_BIRD_BY_ALPHABET_DESC = "/sortBirdByAlphabetDescending";
     public static final String FILTER_BIRD_BY_REQUEST = "/filterBirdByRequest";
+    public static final String UPDATE_BIRD_OWNER = "/updateBirdOwner";
 
     //Order Function
     public static final String CREATE_ORDER = "/createOrder";
@@ -92,6 +93,7 @@ public class ConstantAPI {
     public static final String DELETE_ORDER = "/deleteOrder";
     public static final String SEND_MAIL_CANCEL_ORDER = "/sendMailForCancelOrder";
     public static final String SEND_MAIL_COMPLETE_ORDER = "/sendMailCompleteOrder";
+    public static final String VIEW_ORDER_HISTORY_CUSTOMER = "/viewOrderHistoryCustomer";
 
     //Voucher Function
     public static final String CREATE_VOUCHER = "/createVoucher";
@@ -111,4 +113,12 @@ public class ConstantAPI {
     public static final String GET_INVOICE_BY_ID = "/getVoucherByID";
     public static final String GET_ALL_INVOICE = "/getAllVoucher";
     public static final String UPDATE_INVOICE = "/updateVoucher";
+
+    //Shipper Function
+    public static final String GET_SHIPPED_ORDER = "/getShippedOrder";
+    public static final String UPDATE_ORDER_STATUS_SHIPPER = "/updateShippedOrder";
+
+    // Healthcare Function
+    public static final String VIEW_ALL_BIRD_BELONG_TO_HEALTHCARE = "/viewAllBirdBelongToHealthCare";
+    public static final String UPDATE_BIRD_STATUS_HEALTHCARE = "/updateBirdStatusHealthcare";
 }

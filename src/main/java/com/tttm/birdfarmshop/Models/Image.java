@@ -1,5 +1,6 @@
 package com.tttm.birdfarmshop.Models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -21,6 +22,7 @@ public class Image {
     @Column(name = "imageUrl", nullable = true, unique = false)
     private String imageUrl;
 
+    @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "productID", referencedColumnName = "productID")
     private Product imageProduct;

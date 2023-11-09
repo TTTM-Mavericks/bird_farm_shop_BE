@@ -29,6 +29,7 @@ public class OrderResponse {
     private String note;
 
     private Integer orderAmount;
+    private String OrderStatus;
 
     private Date orderDate;
 

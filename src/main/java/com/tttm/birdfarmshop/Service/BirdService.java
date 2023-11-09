@@ -43,4 +43,6 @@ public interface BirdService {
 
     List<BirdResponse> filterBirdByCustomerRequest(FilterProduct filterProduct);
 
+    BirdResponse updateBirdOwner(String birdID, int customerID);
+
 }

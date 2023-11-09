@@ -1,5 +1,6 @@
 package com.tttm.birdfarmshop.Models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
 import java.util.Date;
@@ -31,6 +32,7 @@ public class News {
   @Temporal(TemporalType.DATE)
   private Date date;
 
+  @JsonIgnore
   @ManyToOne
   @JoinColumn(name = "sellerID")
   private Seller seller;

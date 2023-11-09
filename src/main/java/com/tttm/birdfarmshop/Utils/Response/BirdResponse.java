@@ -38,9 +38,12 @@ public class BirdResponse {
     private Boolean fertility;
 
     private BirdColor birdColor;
+
     private Integer breedingTimes;
 
     private String typeOfBirdID;
 
     private Integer healthcareProfessionalID;
+
+    private Integer ownerID;
 }

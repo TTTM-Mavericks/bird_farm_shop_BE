@@ -41,26 +41,36 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
 
     @Override
-    public AuthenticationResponse login(AuthenticationRequest dto) throws CustomException {
-        if(userRepository.findUserByEmailAndPassword(dto.getEmail(), dto.getPassword()) == null) return new AuthenticationResponse();
-        authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                        dto.getEmail(),
-                        dto.getPassword()
-                )
-        );
-        var user = userRepository.findUserByEmailAndActiveStatus(dto.getEmail(), AccountStatus.ACTIVE.name())
-                .orElseThrow();
-        var accessToken = jwtService.generateToken(user);
-        var refreshToken = jwtService.generateRefreshToken(user);
-        revokeAllUserTokens(user);
-        saveUserToken(user, accessToken);
+    public AuthenticationResponse login(AuthenticationRequest dto){
+        try
+        {
+            authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(
+                            dto.getEmail(),
+                            dto.getPassword()
+                    )
+            );
+            var user = userRepository.findUserByEmailAndActiveStatus(dto.getEmail(), AccountStatus.ACTIVE.name())
+                    .orElseThrow();
+            var accessToken = jwtService.generateToken(user);
+            var refreshToken = jwtService.generateRefreshToken(user);
+            revokeAllUserTokens(user);
+            saveUserToken(user, accessToken);
 
-        return AuthenticationResponse
-                .builder()
-                .accessToken(accessToken)
-                .refreshToken(refreshToken)
-                .build();
+            return AuthenticationResponse
+                    .builder()
+                    .accessToken(accessToken)
+                    .refreshToken(refreshToken)
+                    .userID(user.getUserID())
+                    .email(user.getEmail())
+                    .role(user.getRole().name())
+                    .build();
+        }
+        catch (Exception ex)
+        {
+            logger.error("Authentication fail");
+        }
+        return new AuthenticationResponse();
     }
 
     private void saveUserToken(User user, String jwtToken)

@@ -1,5 +1,6 @@
 package com.tttm.birdfarmshop.Models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.tttm.birdfarmshop.Enums.OrderStatus;
 import jakarta.persistence.*;
 
@@ -17,6 +18,7 @@ public class Order {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
+    @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "customerID")
     private Customer customer;
